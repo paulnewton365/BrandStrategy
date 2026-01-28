@@ -544,7 +544,7 @@ export default function Home() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="font-semibold text-antenna-dark">Stakeholder Interview Transcripts</h3>
-                      <p className="text-sm text-antenna-muted">Upload up to 10 interview transcripts (.txt, .docx, .pdf)</p>
+                      <p className="text-sm text-antenna-muted">Upload up to 10 interview transcripts (.txt, .docx)</p>
                     </div>
                     <span className="text-sm text-antenna-muted">{interviews.length}/10</span>
                   </div>
@@ -553,7 +553,7 @@ export default function Home() {
                     <input
                       type="file"
                       multiple
-                      accept=".txt,.doc,.docx,.pdf"
+                      accept=".txt,.docx"
                       onChange={(e) => e.target.files && handleInterviewUpload(e.target.files)}
                       className="hidden"
                       disabled={interviews.length >= 10}
@@ -563,7 +563,7 @@ export default function Home() {
                       Drop files here or click to upload
                     </p>
                     <p className="text-xs text-antenna-muted/70 mt-1">
-                      Supports .txt, .docx, .pdf
+                      Supports .txt, .docx
                     </p>
                   </label>
 

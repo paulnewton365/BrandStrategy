@@ -1,5 +1,4 @@
 import * as XLSX from 'xlsx';
-import mammoth from 'mammoth';
 
 export function parseVersion(version: string): { major: number; minor: number; patch: number } {
   const [major, minor, patch] = version.split('.').map(Number);
@@ -41,32 +40,10 @@ export function parseSpreadsheet(file: File): Promise<Record<string, string>[]> 
 }
 
 async function parseDocxFile(file: File): Promise<string> {
+  const mammoth = await import('mammoth');
   const arrayBuffer = await file.arrayBuffer();
   const result = await mammoth.extractRawText({ arrayBuffer });
   return result.value;
-}
-
-async function parsePdfFile(file: File): Promise<string> {
-  // Dynamic import to avoid SSR issues
-  const pdfjsLib = await import('pdfjs-dist');
-  
-  // Set worker source
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-  
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let fullText = '';
-  
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    const pageText = textContent.items
-      .map((item: any) => item.str)
-      .join(' ');
-    fullText += pageText + '\n';
-  }
-  
-  return fullText;
 }
 
 function parseTextFileRaw(file: File): Promise<string> {
@@ -85,10 +62,7 @@ export async function parseTextFile(file: File): Promise<string> {
   
   switch (extension) {
     case 'docx':
-    case 'doc':
       return parseDocxFile(file);
-    case 'pdf':
-      return parsePdfFile(file);
     case 'txt':
     default:
       return parseTextFileRaw(file);
