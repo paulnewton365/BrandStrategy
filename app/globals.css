@@ -1,0 +1,164 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-brand-paper text-brand-ink antialiased;
+  }
+  
+  ::selection {
+    @apply bg-brand-accent/20;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-brand-warm rounded-lg 
+           focus:outline-none focus:ring-2 focus:ring-brand-accent/30 focus:border-brand-accent
+           transition-all duration-200;
+  }
+  
+  .btn-primary {
+    @apply px-6 py-3 bg-brand-ink text-white rounded-lg font-medium
+           hover:bg-brand-ink/90 active:scale-[0.98] transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-white border border-brand-ink/20 text-brand-ink rounded-lg font-medium
+           hover:bg-brand-warm active:scale-[0.98] transition-all duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl border border-brand-warm/50 shadow-sm;
+  }
+  
+  .section-title {
+    @apply text-2xl font-display font-semibold text-brand-ink;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-brand-muted mb-2;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-brand-warm/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-brand-muted/30 rounded-full hover:bg-brand-muted/50;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  .print-only {
+    display: block !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+}
+
+/* File upload area */
+.upload-zone {
+  @apply border-2 border-dashed border-brand-warm rounded-xl p-8
+         hover:border-brand-accent/50 hover:bg-brand-warm/20
+         transition-all duration-300 cursor-pointer;
+}
+
+.upload-zone.dragging {
+  @apply border-brand-accent bg-brand-accent/5;
+}
+
+/* Quadrant chart styles */
+.quadrant-chart {
+  @apply relative w-full aspect-square max-w-lg mx-auto;
+}
+
+.quadrant-label {
+  @apply absolute text-xs font-medium text-brand-muted uppercase tracking-wider;
+}
+
+/* Document preview */
+.document-preview {
+  @apply max-w-none;
+}
+
+.document-preview h1 {
+  @apply text-2xl font-display font-bold text-brand-ink mb-4;
+}
+
+.document-preview h2 {
+  @apply text-xl font-display font-semibold text-brand-ink mt-8 mb-3;
+}
+
+.document-preview h3 {
+  @apply text-lg font-display font-semibold text-brand-ink mt-6 mb-2;
+}
+
+.document-preview p {
+  @apply text-brand-ink/90 leading-relaxed mb-4;
+}
+
+.document-preview blockquote {
+  @apply border-l-4 border-brand-accent pl-4 italic text-brand-muted my-4;
+}
+
+.document-preview ul {
+  @apply list-disc pl-6 space-y-2 mb-4;
+}
+
+.document-preview li {
+  @apply text-brand-ink/90;
+}
+
+/* Loading states */
+.skeleton {
+  @apply animate-pulse bg-brand-warm rounded;
+}
+
+/* Tabs */
+.tab-active {
+  @apply border-b-2 border-brand-accent text-brand-accent;
+}
+
+/* Progress indicator */
+.progress-step {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
+         transition-all duration-300;
+}
+
+.progress-step.completed {
+  @apply bg-brand-accent text-white;
+}
+
+.progress-step.active {
+  @apply bg-brand-ink text-white;
+}
+
+.progress-step.pending {
+  @apply bg-brand-warm text-brand-muted;
+}
