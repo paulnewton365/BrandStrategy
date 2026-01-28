@@ -37,7 +37,7 @@ import HypothesisView from '@/components/HypothesisView';
 type Step = 'inputs' | 'findings' | 'hypothesis';
 
 // App version - update with each build
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.2.0';
 
 // Antenna Logo Component
 function AntennaLogo() {
@@ -544,7 +544,7 @@ export default function Home() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <h3 className="font-semibold text-antenna-dark">Stakeholder Interview Transcripts</h3>
-                      <p className="text-sm text-antenna-muted">Upload up to 10 interview transcripts (.txt files)</p>
+                      <p className="text-sm text-antenna-muted">Upload up to 10 interview transcripts (.txt, .docx, .pdf)</p>
                     </div>
                     <span className="text-sm text-antenna-muted">{interviews.length}/10</span>
                   </div>
@@ -553,7 +553,7 @@ export default function Home() {
                     <input
                       type="file"
                       multiple
-                      accept=".txt,.doc,.docx"
+                      accept=".txt,.doc,.docx,.pdf"
                       onChange={(e) => e.target.files && handleInterviewUpload(e.target.files)}
                       className="hidden"
                       disabled={interviews.length >= 10}
@@ -561,6 +561,9 @@ export default function Home() {
                     <Upload className="w-8 h-8 mx-auto mb-2 text-antenna-muted" />
                     <p className="text-antenna-muted">
                       Drop files here or click to upload
+                    </p>
+                    <p className="text-xs text-antenna-muted/70 mt-1">
+                      Supports .txt, .docx, .pdf
                     </p>
                   </label>
 
