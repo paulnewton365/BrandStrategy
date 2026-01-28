@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { 
   Upload, 
   FileText, 
@@ -17,7 +17,9 @@ import {
   Eye,
   ArrowUpRight,
   Pencil,
-  Search
+  Save,
+  Download,
+  ChevronDown
 } from 'lucide-react';
 import { 
   StakeholderInterview, 
@@ -35,16 +37,35 @@ import HypothesisView from '@/components/HypothesisView';
 type Step = 'inputs' | 'findings' | 'hypothesis';
 
 // App version - update with each build
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 
-// Antenna Logo Component - matches the text-based logo in screenshot
+// Antenna Logo Component with signal bars SVG
 function AntennaLogo() {
   return (
-    <div className="flex flex-col leading-none">
-      <span className="text-2xl font-bold text-antenna-dark tracking-tight">.antenna</span>
-      <span className="text-[10px] text-antenna-muted tracking-widest uppercase">group</span>
-    </div>
+    <svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Signal bars */}
+      <rect x="0" y="22" width="4" height="8" rx="1" fill="#1a1a2e" opacity="0.4"/>
+      <rect x="6" y="17" width="4" height="13" rx="1" fill="#1a1a2e" opacity="0.6"/>
+      <rect x="12" y="12" width="4" height="18" rx="1" fill="#1a1a2e" opacity="0.8"/>
+      <rect x="18" y="7" width="4" height="23" rx="1" fill="#1a1a2e"/>
+      {/* Text */}
+      <text x="28" y="24" fontFamily="DM Sans, sans-serif" fontSize="18" fontWeight="700" fill="#1a1a2e">.antenna</text>
+      <text x="28" y="31" fontFamily="DM Sans, sans-serif" fontSize="8" fontWeight="500" fill="#6b6b7b" letterSpacing="1.5">GROUP</text>
+    </svg>
   );
+}
+
+// Session data type
+interface SessionData {
+  brandName: string;
+  interviews: { name: string; content: string }[];
+  questionnaires: Record<string, string>[];
+  audienceInsights: AudienceInsight[];
+  competitorInsights: CompetitorInsight[];
+  assessorComments: { comment: string; source: string }[];
+  findingsDocument: FindingsDocument | null;
+  brandHypothesis: BrandHypothesis | null;
+  savedAt: string;
 }
 
 export default function Home() {
@@ -62,6 +83,93 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'interviews' | 'questionnaires' | 'audiences' | 'competitors' | 'comments'>('interviews');
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Save session to JSON
+  const handleSaveSession = useCallback(() => {
+    const sessionData: SessionData = {
+      brandName,
+      interviews: interviews.map(i => ({ name: i.name, content: i.content })),
+      questionnaires: questionnaires.map(q => q.responses),
+      audienceInsights,
+      competitorInsights,
+      assessorComments: assessorComments.map(c => ({ comment: c.comment, source: c.source })),
+      findingsDocument,
+      brandHypothesis,
+      savedAt: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(sessionData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${brandName || 'brand-strategy'}_session_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [brandName, interviews, questionnaires, audienceInsights, competitorInsights, assessorComments, findingsDocument, brandHypothesis]);
+
+  // Load session from JSON
+  const handleLoadSession = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data: SessionData = JSON.parse(e.target?.result as string);
+        
+        setBrandName(data.brandName || '');
+        setInterviews(data.interviews.map(i => ({
+          id: generateId(),
+          name: i.name,
+          content: i.content,
+          uploadedAt: new Date()
+        })));
+        setQuestionnaires(data.questionnaires.map(q => ({
+          id: generateId(),
+          responses: q,
+          uploadedAt: new Date()
+        })));
+        setAudienceInsights(data.audienceInsights.map(a => ({ ...a, id: generateId() })));
+        setCompetitorInsights(data.competitorInsights.map(c => ({ ...c, id: generateId() })));
+        setAssessorComments(data.assessorComments.map(c => ({
+          id: generateId(),
+          comment: c.comment,
+          source: c.source,
+          uploadedAt: new Date()
+        })));
+        
+        if (data.findingsDocument) {
+          setFindingsDocument(data.findingsDocument);
+        }
+        if (data.brandHypothesis) {
+          setBrandHypothesis(data.brandHypothesis);
+        }
+
+        setShowForm(true);
+        if (data.brandHypothesis) {
+          setCurrentStep('hypothesis');
+        } else if (data.findingsDocument) {
+          setCurrentStep('findings');
+        } else {
+          setCurrentStep('inputs');
+        }
+
+        setError(null);
+      } catch (err) {
+        setError('Failed to load session file. Please check the file format.');
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset the input
+    if (event.target) {
+      event.target.value = '';
+    }
+  }, []);
 
   // File upload handlers
   const handleInterviewUpload = useCallback(async (files: FileList) => {
@@ -247,18 +355,20 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-antenna-bg">
+      {/* Hidden file input for loading sessions */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json"
+        onChange={handleLoadSession}
+        className="hidden"
+      />
+
       {/* Header */}
       <header className="py-6 px-8">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <AntennaLogo />
-          <a 
-            href="https://www.antennagroup.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm text-antenna-muted hover:text-antenna-dark transition-colors"
-          >
-            Back to Antenna
-          </a>
+          <div />
         </div>
       </header>
 
@@ -272,20 +382,19 @@ export default function Home() {
         {/* Landing Page */}
         {currentStep === 'inputs' && !showForm && (
           <div className="animate-fade-in pt-16">
-            <div className="text-center mb-20">
+            <div className="text-center mb-16">
               <h1 className="text-5xl md:text-6xl font-display font-bold text-antenna-dark mb-6">
                 Brand Strategy Builder
               </h1>
               <p className="text-lg text-antenna-muted max-w-2xl mx-auto leading-relaxed">
-                Generate brand strategy hypotheses from stakeholder research or review<br />
-                existing findings against Antenna Group quality standards.
+                Generate brand strategy hypotheses from stakeholder research.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <div className="max-w-md mx-auto">
               {/* New Analysis Card */}
-              <div className="card p-8">
-                <div className="icon-box">
+              <div className="card p-8 text-center">
+                <div className="icon-box mx-auto">
                   <Pencil strokeWidth={1.5} />
                 </div>
                 <h2 className="text-xl font-bold text-antenna-dark mb-3">
@@ -296,33 +405,22 @@ export default function Home() {
                 </p>
                 <button 
                   onClick={() => setShowForm(true)}
-                  className="accent-link group"
+                  className="btn-primary w-full mb-4"
                 >
-                  <span className="highlight">Get started</span>
-                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    Get Started
+                    <ArrowUpRight className="w-4 h-4" />
+                  </span>
                 </button>
-              </div>
-
-              {/* Info Card */}
-              <div className="card p-8">
-                <div className="icon-box">
-                  <Search strokeWidth={1.5} />
-                </div>
-                <h2 className="text-xl font-bold text-antenna-dark mb-3">
-                  How It Works
-                </h2>
-                <p className="text-antenna-muted mb-6 leading-relaxed">
-                  Upload research inputs, generate a findings document with key insights, then create a complete brand strategy hypothesis with positioning.
-                </p>
-                <a 
-                  href="https://www.antennagroup.com/expertise/branding-strategy"
-                  target="_blank"
-                  rel="noopener noreferrer" 
-                  className="accent-link group"
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-secondary w-full"
                 >
-                  <span className="highlight">Learn more</span>
-                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </a>
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <Upload className="w-4 h-4" />
+                    Load Previous Session
+                  </span>
+                </button>
               </div>
             </div>
           </div>
@@ -349,20 +447,31 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="mb-8">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <button
+                  onClick={() => setShowForm(false)}
+                  className="flex items-center gap-2 text-antenna-muted hover:text-antenna-dark mb-4 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+                <h2 className="text-3xl font-display font-bold text-antenna-dark mb-2">
+                  Research Inputs
+                </h2>
+                <p className="text-antenna-muted">
+                  Upload stakeholder interviews, questionnaire responses, and other research materials.
+                </p>
+              </div>
               <button
-                onClick={() => setShowForm(false)}
-                className="flex items-center gap-2 text-antenna-muted hover:text-antenna-dark mb-4 transition-colors"
+                onClick={handleSaveSession}
+                className="btn-secondary flex items-center gap-2"
               >
-                <ArrowLeft className="w-4 h-4" />
-                Back
+                <span className="relative z-10 flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  Save Session
+                </span>
               </button>
-              <h2 className="text-3xl font-display font-bold text-antenna-dark mb-2">
-                Research Inputs
-              </h2>
-              <p className="text-antenna-muted">
-                Upload stakeholder interviews, questionnaire responses, and other research materials.
-              </p>
             </div>
 
             {/* Brand Name */}
@@ -490,9 +599,11 @@ export default function Home() {
                       <h3 className="font-semibold text-antenna-dark">Primary Audience Insights</h3>
                       <p className="text-sm text-antenna-muted">Define key audience segments and their characteristics</p>
                     </div>
-                    <button onClick={addAudienceInsight} className="btn-secondary flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      Add Audience
+                    <button onClick={addAudienceInsight} className="btn-secondary">
+                      <span className="relative z-10 flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add Audience
+                      </span>
                     </button>
                   </div>
 
@@ -557,9 +668,11 @@ export default function Home() {
                       <h3 className="font-semibold text-antenna-dark">Competitor Insights</h3>
                       <p className="text-sm text-antenna-muted">Analyze competitive positioning and characteristics</p>
                     </div>
-                    <button onClick={addCompetitorInsight} className="btn-secondary flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      Add Competitor
+                    <button onClick={addCompetitorInsight} className="btn-secondary">
+                      <span className="relative z-10 flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add Competitor
+                      </span>
                     </button>
                   </div>
 
@@ -633,9 +746,11 @@ export default function Home() {
                       <h3 className="font-semibold text-antenna-dark">Assessor Comments</h3>
                       <p className="text-sm text-antenna-muted">Add observations and commentary from assessors</p>
                     </div>
-                    <button onClick={addAssessorComment} className="btn-secondary flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      Add Comment
+                    <button onClick={addAssessorComment} className="btn-secondary">
+                      <span className="relative z-10 flex items-center gap-2">
+                        <Plus className="w-4 h-4" />
+                        Add Comment
+                      </span>
                     </button>
                   </div>
 
@@ -675,19 +790,21 @@ export default function Home() {
               <button
                 onClick={handleAnalyze}
                 disabled={!canProceed || isAnalyzing}
-                className="btn-primary flex items-center gap-2"
+                className="btn-primary"
               >
-                {isAnalyzing ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Analyzing...
-                  </>
-                ) : (
-                  <>
-                    Generate Findings
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
+                <span className="relative z-10 flex items-center gap-2">
+                  {isAnalyzing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      Generate Findings
+                      <ChevronRight className="w-4 h-4" />
+                    </>
+                  )}
+                </span>
               </button>
             </div>
           </div>
@@ -728,33 +845,46 @@ export default function Home() {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => { setCurrentStep('inputs'); setShowForm(true); }}
-                  className="btn-secondary flex items-center gap-2"
+                  onClick={handleSaveSession}
+                  className="btn-secondary"
                 >
-                  <RefreshCw className="w-4 h-4" />
-                  Add More Inputs
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    Save Session
+                  </span>
+                </button>
+                <button
+                  onClick={() => { setCurrentStep('inputs'); setShowForm(true); }}
+                  className="btn-secondary"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Add More Inputs
+                  </span>
                 </button>
                 <button
                   onClick={handleGenerateHypothesis}
                   disabled={isGenerating}
-                  className="btn-primary flex items-center gap-2"
+                  className="btn-primary"
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      Generate Hypothesis
-                      <ChevronRight className="w-4 h-4" />
-                    </>
-                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        Generate Hypothesis
+                        <ChevronRight className="w-4 h-4" />
+                      </>
+                    )}
+                  </span>
                 </button>
               </div>
             </div>
 
-            <FindingsView findings={findingsDocument} />
+            <FindingsView findings={findingsDocument} brandName={brandName} />
           </div>
         )}
 
@@ -793,16 +923,27 @@ export default function Home() {
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setCurrentStep('findings')}
-                  className="btn-secondary flex items-center gap-2"
+                  onClick={handleSaveSession}
+                  className="btn-secondary"
                 >
-                  <Eye className="w-4 h-4" />
-                  View Findings
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Save className="w-4 h-4" />
+                    Save Session
+                  </span>
+                </button>
+                <button
+                  onClick={() => setCurrentStep('findings')}
+                  className="btn-secondary"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    View Findings
+                  </span>
                 </button>
               </div>
             </div>
 
-            <HypothesisView hypothesis={brandHypothesis} />
+            <HypothesisView hypothesis={brandHypothesis} brandName={brandName} />
           </div>
         )}
       </main>

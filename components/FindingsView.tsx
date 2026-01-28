@@ -1,19 +1,26 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { Download, Quote, TrendingUp, AlertTriangle, Lightbulb, Users, Target, FileText } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Download, Quote, TrendingUp, AlertTriangle, Lightbulb, Users, Target, FileText, ChevronDown, FileType, File } from 'lucide-react';
 import { FindingsDocument } from '@/types';
 import QuadrantChart from './QuadrantChart';
 import { formatDate, sanitizeForPDF } from '@/lib/utils';
+import { generateFindingsDocx } from '@/lib/docxExport';
 
 interface FindingsViewProps {
   findings: FindingsDocument;
+  brandName: string;
 }
 
-export default function FindingsView({ findings }: FindingsViewProps) {
+export default function FindingsView({ findings, brandName }: FindingsViewProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = async () => {
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
     if (typeof window !== 'undefined') {
       const { jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
@@ -44,19 +51,71 @@ export default function FindingsView({ findings }: FindingsViewProps) {
           heightLeft -= 297;
         }
         
-        pdf.save(`${findings.brandName}_Findings_v${findings.version}.pdf`);
+        pdf.save(`${brandName}_Findings_v${findings.version}.pdf`);
       }
     }
+    setIsExporting(false);
+  };
+
+  const handleExportDocx = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      const blob = await generateFindingsDocx(findings);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${brandName}_Findings_v${findings.version}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting DOCX:', err);
+    }
+    
+    setIsExporting(false);
   };
 
   return (
     <div>
-      <div className="flex justify-end mb-4 no-print">
-        <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
-          <Download className="w-4 h-4" />
-          Export PDF
-        </button>
+      <div className="flex justify-end mb-4 no-print relative">
+        <div className="relative">
+          <button 
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            disabled={isExporting}
+            className="btn-secondary"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              {isExporting ? 'Exporting...' : 'Export'}
+              <ChevronDown className="w-4 h-4" />
+            </span>
+          </button>
+          
+          {showExportMenu && (
+            <div className="export-dropdown">
+              <button onClick={handleExportPDF}>
+                <File className="w-4 h-4 text-red-500" />
+                Export as PDF
+              </button>
+              <button onClick={handleExportDocx}>
+                <FileType className="w-4 h-4 text-blue-500" />
+                Export as Word (.docx)
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Click outside to close menu */}
+      {showExportMenu && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowExportMenu(false)}
+        />
+      )}
 
       <div ref={contentRef} className="space-y-6">
         {/* Header */}
@@ -64,7 +123,7 @@ export default function FindingsView({ findings }: FindingsViewProps) {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-display font-bold text-antenna-dark mb-2">
-                {findings.brandName} Brand Analysis
+                {brandName} Brand Analysis
               </h1>
               <p className="text-antenna-muted">Stakeholder Interview Findings</p>
             </div>
@@ -277,7 +336,7 @@ export default function FindingsView({ findings }: FindingsViewProps) {
             </div>
             Positioning Opportunity
           </h2>
-          <QuadrantChart quadrant={findings.positioningQuadrant} brandName={findings.brandName} />
+          <QuadrantChart quadrant={findings.positioningQuadrant} brandName={brandName} />
         </div>
 
         {/* Strategic Direction */}

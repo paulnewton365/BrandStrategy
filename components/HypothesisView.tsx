@@ -1,18 +1,25 @@
 'use client';
 
-import React, { useRef } from 'react';
-import { Download, Check, Palette, MessageSquare, Sparkles, Target, Heart } from 'lucide-react';
+import React, { useRef, useState } from 'react';
+import { Download, Check, Palette, MessageSquare, Sparkles, Target, Heart, ChevronDown, FileType, File } from 'lucide-react';
 import { BrandHypothesis } from '@/types';
 import { formatDate, sanitizeForPDF } from '@/lib/utils';
+import { generateHypothesisDocx } from '@/lib/docxExport';
 
 interface HypothesisViewProps {
   hypothesis: BrandHypothesis;
+  brandName: string;
 }
 
-export default function HypothesisView({ hypothesis }: HypothesisViewProps) {
+export default function HypothesisView({ hypothesis, brandName }: HypothesisViewProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const handleExport = async () => {
+  const handleExportPDF = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
     if (typeof window !== 'undefined') {
       const { jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
@@ -43,19 +50,71 @@ export default function HypothesisView({ hypothesis }: HypothesisViewProps) {
           heightLeft -= 297;
         }
         
-        pdf.save(`${hypothesis.brandName}_Brand_Hypothesis_v${hypothesis.version}.pdf`);
+        pdf.save(`${brandName}_Brand_Hypothesis_v${hypothesis.version}.pdf`);
       }
     }
+    setIsExporting(false);
+  };
+
+  const handleExportDocx = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      const blob = await generateHypothesisDocx(hypothesis);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${brandName}_Brand_Hypothesis_v${hypothesis.version}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error exporting DOCX:', err);
+    }
+    
+    setIsExporting(false);
   };
 
   return (
     <div>
-      <div className="flex justify-end mb-4 no-print">
-        <button onClick={handleExport} className="btn-secondary flex items-center gap-2">
-          <Download className="w-4 h-4" />
-          Export PDF
-        </button>
+      <div className="flex justify-end mb-4 no-print relative">
+        <div className="relative">
+          <button 
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            disabled={isExporting}
+            className="btn-secondary"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              {isExporting ? 'Exporting...' : 'Export'}
+              <ChevronDown className="w-4 h-4" />
+            </span>
+          </button>
+          
+          {showExportMenu && (
+            <div className="export-dropdown">
+              <button onClick={handleExportPDF}>
+                <File className="w-4 h-4 text-red-500" />
+                Export as PDF
+              </button>
+              <button onClick={handleExportDocx}>
+                <FileType className="w-4 h-4 text-blue-500" />
+                Export as Word (.docx)
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Click outside to close menu */}
+      {showExportMenu && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowExportMenu(false)}
+        />
+      )}
 
       <div ref={contentRef} className="space-y-6">
         {/* Header */}
@@ -63,7 +122,7 @@ export default function HypothesisView({ hypothesis }: HypothesisViewProps) {
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-display font-bold text-antenna-dark mb-2">
-                {hypothesis.brandName} Brief
+                {brandName} Brief
               </h1>
               <p className="text-antenna-muted">Brand Strategy and Creative Direction</p>
             </div>
@@ -80,7 +139,7 @@ export default function HypothesisView({ hypothesis }: HypothesisViewProps) {
             <div className="icon-box !mb-0">
               <Target strokeWidth={1.5} />
             </div>
-            What {hypothesis.brandName} Does
+            What {brandName} Does
           </h2>
           <p className="text-antenna-text leading-relaxed text-lg">
             {sanitizeForPDF(hypothesis.whatStatement)}
@@ -93,7 +152,7 @@ export default function HypothesisView({ hypothesis }: HypothesisViewProps) {
             <div className="icon-box !mb-0">
               <Heart strokeWidth={1.5} />
             </div>
-            Why {hypothesis.brandName} Does It
+            Why {brandName} Does It
           </h2>
           <p className="text-antenna-text leading-relaxed text-lg">
             {sanitizeForPDF(hypothesis.whyStatement)}
@@ -106,7 +165,7 @@ export default function HypothesisView({ hypothesis }: HypothesisViewProps) {
             <div className="icon-box !mb-0">
               <Sparkles strokeWidth={1.5} />
             </div>
-            How {hypothesis.brandName} Thinks, Works & Acts
+            How {brandName} Thinks, Works & Acts
           </h2>
           <p className="text-antenna-text leading-relaxed text-lg">
             {sanitizeForPDF(hypothesis.howStatement)}
