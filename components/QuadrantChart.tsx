@@ -14,40 +14,45 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="relative aspect-square bg-white border border-brand-warm rounded-lg overflow-hidden">
+      <div className="relative aspect-square bg-white border border-antenna-border rounded-xl overflow-hidden shadow-card">
         {/* Grid lines */}
         <div className="absolute inset-0">
           {/* Vertical center line */}
-          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-brand-warm" />
+          <div className="absolute left-1/2 top-0 bottom-0 w-px bg-antenna-border" />
           {/* Horizontal center line */}
-          <div className="absolute top-1/2 left-0 right-0 h-px bg-brand-warm" />
+          <div className="absolute top-1/2 left-0 right-0 h-px bg-antenna-border" />
+          {/* Subtle grid */}
+          <div className="absolute left-1/4 top-0 bottom-0 w-px bg-antenna-border/50" />
+          <div className="absolute left-3/4 top-0 bottom-0 w-px bg-antenna-border/50" />
+          <div className="absolute top-1/4 left-0 right-0 h-px bg-antenna-border/50" />
+          <div className="absolute top-3/4 left-0 right-0 h-px bg-antenna-border/50" />
         </div>
 
         {/* Quadrant labels */}
-        <div className="absolute top-4 left-4 text-xs text-brand-muted font-medium uppercase tracking-wide">
+        <div className="absolute top-4 left-4 text-xs text-antenna-muted font-medium uppercase tracking-wide">
           Visionary + Technical
         </div>
-        <div className="absolute top-4 right-4 text-xs text-brand-muted font-medium uppercase tracking-wide text-right">
+        <div className="absolute top-4 right-4 text-xs text-antenna-muted font-medium uppercase tracking-wide text-right">
           Visionary + Benefit
         </div>
-        <div className="absolute bottom-4 left-4 text-xs text-brand-muted font-medium uppercase tracking-wide">
+        <div className="absolute bottom-4 left-4 text-xs text-antenna-muted font-medium uppercase tracking-wide">
           Pragmatic + Technical
         </div>
-        <div className="absolute bottom-4 right-4 text-xs text-brand-muted font-medium uppercase tracking-wide text-right">
+        <div className="absolute bottom-4 right-4 text-xs text-antenna-muted font-medium uppercase tracking-wide text-right">
           Pragmatic + Benefit
         </div>
 
         {/* Axis labels */}
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-brand-ink whitespace-nowrap">
+        <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-antenna-dark whitespace-nowrap">
           {quadrant.yAxis.topLabel}
         </div>
-        <div className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-xs font-medium text-brand-ink whitespace-nowrap">
+        <div className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-xs font-medium text-antenna-dark whitespace-nowrap">
           {quadrant.yAxis.bottomLabel}
         </div>
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-medium text-brand-ink">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-medium text-antenna-dark">
           {quadrant.xAxis.leftLabel}
         </div>
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-medium text-brand-ink">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-medium text-antenna-dark">
           {quadrant.xAxis.rightLabel}
         </div>
 
@@ -55,14 +60,14 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
         {quadrant.competitors.map((competitor, index) => (
           <div
             key={index}
-            className="absolute transform -translate-x-1/2 -translate-y-1/2"
+            className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
             style={{
               left: `${toPercent(competitor.x)}%`,
               top: `${100 - toPercent(competitor.y)}%`
             }}
           >
-            <div className="w-3 h-3 bg-brand-muted rounded-full" />
-            <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs text-brand-muted whitespace-nowrap">
+            <div className="w-3 h-3 bg-antenna-muted rounded-full border-2 border-white shadow-sm" />
+            <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs text-antenna-muted whitespace-nowrap">
               {competitor.name}
             </span>
           </div>
@@ -70,28 +75,28 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
 
         {/* Current Position */}
         <div
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
           style={{
             left: `${toPercent(quadrant.currentPosition.x)}%`,
             top: `${100 - toPercent(quadrant.currentPosition.y)}%`
           }}
         >
-          <div className="w-5 h-5 bg-brand-ink rounded-full border-2 border-white shadow-lg" />
-          <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs font-medium text-brand-ink whitespace-nowrap">
+          <div className="w-5 h-5 bg-antenna-dark rounded-full border-2 border-white shadow-lg" />
+          <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs font-medium text-antenna-dark whitespace-nowrap bg-white px-2 py-0.5 rounded shadow-sm">
             {brandName} (Current)
           </span>
         </div>
 
         {/* Target Position */}
         <div
-          className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
+          className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
           style={{
             left: `${toPercent(quadrant.targetPosition.x)}%`,
             top: `${100 - toPercent(quadrant.targetPosition.y)}%`
           }}
         >
-          <div className="w-5 h-5 bg-brand-accent rounded-full border-2 border-white shadow-lg" />
-          <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs font-medium text-brand-accent whitespace-nowrap">
+          <div className="w-5 h-5 bg-antenna-accent rounded-full border-2 border-white shadow-lg" />
+          <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs font-medium text-antenna-dark whitespace-nowrap bg-white px-2 py-0.5 rounded shadow-sm">
             {brandName} (Target)
           </span>
         </div>
@@ -99,7 +104,7 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
         {/* Arrow from current to target */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none"
-          style={{ zIndex: 5 }}
+          style={{ zIndex: 15 }}
         >
           <defs>
             <marker
@@ -112,7 +117,7 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
             >
               <polygon
                 points="0 0, 10 3.5, 0 7"
-                fill="#c45d3a"
+                fill="#1a1a2e"
               />
             </marker>
           </defs>
@@ -121,9 +126,9 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
             y1={`${100 - toPercent(quadrant.currentPosition.y)}%`}
             x2={`${toPercent(quadrant.targetPosition.x)}%`}
             y2={`${100 - toPercent(quadrant.targetPosition.y)}%`}
-            stroke="#c45d3a"
+            stroke="#1a1a2e"
             strokeWidth="2"
-            strokeDasharray="4"
+            strokeDasharray="6"
             markerEnd="url(#arrowhead)"
           />
         </svg>
@@ -132,16 +137,16 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
       {/* Legend */}
       <div className="flex items-center justify-center gap-6 mt-4 text-sm">
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-brand-ink rounded-full" />
-          <span className="text-brand-muted">Current Position</span>
+          <div className="w-3 h-3 bg-antenna-dark rounded-full" />
+          <span className="text-antenna-muted">Current Position</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-brand-accent rounded-full" />
-          <span className="text-brand-muted">Target Position</span>
+          <div className="w-3 h-3 bg-antenna-accent rounded-full" />
+          <span className="text-antenna-muted">Target Position</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-brand-muted rounded-full" />
-          <span className="text-brand-muted">Competitors</span>
+          <div className="w-3 h-3 bg-antenna-muted rounded-full" />
+          <span className="text-antenna-muted">Competitors</span>
         </div>
       </div>
     </div>

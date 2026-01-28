@@ -12,13 +12,14 @@ import {
   Trash2,
   Check,
   Loader2,
-  Download,
   RefreshCw,
   ArrowLeft,
-  Eye
+  Eye,
+  ArrowUpRight,
+  Pencil,
+  Search
 } from 'lucide-react';
 import { 
-  BrandInputs, 
   StakeholderInterview, 
   QuestionnaireResponse,
   AudienceInsight,
@@ -30,12 +31,25 @@ import {
 import { generateId, parseSpreadsheet, parseTextFile } from '@/lib/utils';
 import FindingsView from '@/components/FindingsView';
 import HypothesisView from '@/components/HypothesisView';
-import QuadrantChart from '@/components/QuadrantChart';
 
 type Step = 'inputs' | 'findings' | 'hypothesis';
 
+// App version - update with each build
+const APP_VERSION = '1.0.0';
+
+// Antenna Logo Component - matches the text-based logo in screenshot
+function AntennaLogo() {
+  return (
+    <div className="flex flex-col leading-none">
+      <span className="text-2xl font-bold text-antenna-dark tracking-tight">.antenna</span>
+      <span className="text-[10px] text-antenna-muted tracking-widest uppercase">group</span>
+    </div>
+  );
+}
+
 export default function Home() {
   const [currentStep, setCurrentStep] = useState<Step>('inputs');
+  const [showForm, setShowForm] = useState(false);
   const [brandName, setBrandName] = useState('');
   const [interviews, setInterviews] = useState<StakeholderInterview[]>([]);
   const [questionnaires, setQuestionnaires] = useState<QuestionnaireResponse[]>([]);
@@ -232,53 +246,121 @@ export default function Home() {
   const canProceed = brandName.trim() && interviews.length > 0;
 
   return (
-    <div className="min-h-screen bg-brand-paper">
+    <div className="min-h-screen bg-antenna-bg">
       {/* Header */}
-      <header className="border-b border-brand-warm bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <h1 className="text-xl font-display font-semibold text-brand-ink">
-                Brand Strategy Builder
-              </h1>
-              {brandName && (
-                <span className="px-3 py-1 bg-brand-warm rounded-full text-sm text-brand-muted">
-                  {brandName}
-                </span>
-              )}
-            </div>
-            
-            {/* Progress Steps */}
-            <div className="flex items-center gap-2">
-              <div className={`progress-step ${currentStep === 'inputs' ? 'active' : findingsDocument ? 'completed' : 'pending'}`}>
-                {findingsDocument ? <Check className="w-4 h-4" /> : '1'}
-              </div>
-              <div className="w-8 h-0.5 bg-brand-warm" />
-              <div className={`progress-step ${currentStep === 'findings' ? 'active' : brandHypothesis ? 'completed' : 'pending'}`}>
-                {brandHypothesis ? <Check className="w-4 h-4" /> : '2'}
-              </div>
-              <div className="w-8 h-0.5 bg-brand-warm" />
-              <div className={`progress-step ${currentStep === 'hypothesis' ? 'active' : 'pending'}`}>
-                3
-              </div>
-            </div>
-          </div>
+      <header className="py-6 px-8">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <AntennaLogo />
+          <a 
+            href="https://www.antennagroup.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sm text-antenna-muted hover:text-antenna-dark transition-colors"
+          >
+            Back to Antenna
+          </a>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-6xl mx-auto px-8 pb-24">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
             {error}
           </div>
         )}
 
-        {/* Step 1: Inputs */}
-        {currentStep === 'inputs' && (
+        {/* Landing Page */}
+        {currentStep === 'inputs' && !showForm && (
+          <div className="animate-fade-in pt-16">
+            <div className="text-center mb-20">
+              <h1 className="text-5xl md:text-6xl font-display font-bold text-antenna-dark mb-6">
+                Brand Strategy Builder
+              </h1>
+              <p className="text-lg text-antenna-muted max-w-2xl mx-auto leading-relaxed">
+                Generate brand strategy hypotheses from stakeholder research or review<br />
+                existing findings against Antenna Group quality standards.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* New Analysis Card */}
+              <div className="card p-8">
+                <div className="icon-box">
+                  <Pencil strokeWidth={1.5} />
+                </div>
+                <h2 className="text-xl font-bold text-antenna-dark mb-3">
+                  Start New Analysis
+                </h2>
+                <p className="text-antenna-muted mb-6 leading-relaxed">
+                  Upload stakeholder IDI transcripts and questionnaire responses. AI analyzes the research to identify themes, tensions, and opportunities.
+                </p>
+                <button 
+                  onClick={() => setShowForm(true)}
+                  className="accent-link group"
+                >
+                  <span className="highlight">Get started</span>
+                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </button>
+              </div>
+
+              {/* Info Card */}
+              <div className="card p-8">
+                <div className="icon-box">
+                  <Search strokeWidth={1.5} />
+                </div>
+                <h2 className="text-xl font-bold text-antenna-dark mb-3">
+                  How It Works
+                </h2>
+                <p className="text-antenna-muted mb-6 leading-relaxed">
+                  Upload research inputs, generate a findings document with key insights, then create a complete brand strategy hypothesis with positioning.
+                </p>
+                <a 
+                  href="https://www.antennagroup.com/expertise/branding-strategy"
+                  target="_blank"
+                  rel="noopener noreferrer" 
+                  className="accent-link group"
+                >
+                  <span className="highlight">Learn more</span>
+                  <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Input Form */}
+        {currentStep === 'inputs' && showForm && (
           <div className="animate-fade-in">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-center gap-3 mb-12 pt-4">
+              <div className="flex items-center gap-2">
+                <div className="progress-step active">1</div>
+                <span className="text-sm font-medium text-antenna-dark">Inputs</span>
+              </div>
+              <div className="w-12 h-px bg-antenna-border" />
+              <div className="flex items-center gap-2">
+                <div className="progress-step pending">2</div>
+                <span className="text-sm text-antenna-muted">Findings</span>
+              </div>
+              <div className="w-12 h-px bg-antenna-border" />
+              <div className="flex items-center gap-2">
+                <div className="progress-step pending">3</div>
+                <span className="text-sm text-antenna-muted">Hypothesis</span>
+              </div>
+            </div>
+
             <div className="mb-8">
-              <h2 className="section-title mb-2">Research Inputs</h2>
-              <p className="text-brand-muted">
+              <button
+                onClick={() => setShowForm(false)}
+                className="flex items-center gap-2 text-antenna-muted hover:text-antenna-dark mb-4 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+              <h2 className="text-3xl font-display font-bold text-antenna-dark mb-2">
+                Research Inputs
+              </h2>
+              <p className="text-antenna-muted">
                 Upload stakeholder interviews, questionnaire responses, and other research materials.
               </p>
             </div>
@@ -296,7 +378,7 @@ export default function Home() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-1 mb-6 border-b border-brand-warm">
+            <div className="flex gap-1 mb-6 border-b border-antenna-border overflow-x-auto">
               {[
                 { id: 'interviews', label: 'IDI Transcripts', icon: FileText, count: interviews.length },
                 { id: 'questionnaires', label: 'Questionnaires', icon: MessageSquare, count: questionnaires.length },
@@ -307,13 +389,13 @@ export default function Home() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors
-                    ${activeTab === tab.id ? 'tab-active' : 'text-brand-muted hover:text-brand-ink'}`}
+                  className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors whitespace-nowrap
+                    ${activeTab === tab.id ? 'tab-active' : 'text-antenna-muted hover:text-antenna-dark'}`}
                 >
                   <tab.icon className="w-4 h-4" />
                   {tab.label}
                   {tab.count > 0 && (
-                    <span className="px-2 py-0.5 bg-brand-accent/10 text-brand-accent rounded-full text-xs">
+                    <span className="px-2 py-0.5 bg-antenna-dark text-white rounded-full text-xs">
                       {tab.count}
                     </span>
                   )}
@@ -328,10 +410,10 @@ export default function Home() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-medium text-brand-ink">Stakeholder Interview Transcripts</h3>
-                      <p className="text-sm text-brand-muted">Upload up to 10 interview transcripts (.txt files)</p>
+                      <h3 className="font-semibold text-antenna-dark">Stakeholder Interview Transcripts</h3>
+                      <p className="text-sm text-antenna-muted">Upload up to 10 interview transcripts (.txt files)</p>
                     </div>
-                    <span className="text-sm text-brand-muted">{interviews.length}/10</span>
+                    <span className="text-sm text-antenna-muted">{interviews.length}/10</span>
                   </div>
 
                   <label className="upload-zone block text-center mb-4">
@@ -343,8 +425,8 @@ export default function Home() {
                       className="hidden"
                       disabled={interviews.length >= 10}
                     />
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-brand-muted" />
-                    <p className="text-brand-muted">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-antenna-muted" />
+                    <p className="text-antenna-muted">
                       Drop files here or click to upload
                     </p>
                   </label>
@@ -352,16 +434,16 @@ export default function Home() {
                   {interviews.length > 0 && (
                     <div className="space-y-2">
                       {interviews.map((interview) => (
-                        <div key={interview.id} className="flex items-center justify-between p-3 bg-brand-warm/30 rounded-lg">
+                        <div key={interview.id} className="flex items-center justify-between p-3 bg-antenna-bg rounded-lg">
                           <div className="flex items-center gap-3">
-                            <FileText className="w-4 h-4 text-brand-muted" />
-                            <span className="text-sm font-medium">{interview.name}</span>
+                            <FileText className="w-4 h-4 text-antenna-dark" />
+                            <span className="text-sm font-medium text-antenna-dark">{interview.name}</span>
                           </div>
                           <button
                             onClick={() => removeInterview(interview.id)}
-                            className="p-1 hover:bg-brand-warm rounded"
+                            className="p-1 hover:bg-white rounded transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 text-brand-muted" />
+                            <Trash2 className="w-4 h-4 text-antenna-muted hover:text-antenna-error" />
                           </button>
                         </div>
                       ))}
@@ -374,8 +456,8 @@ export default function Home() {
               {activeTab === 'questionnaires' && (
                 <div>
                   <div className="mb-4">
-                    <h3 className="font-medium text-brand-ink">Questionnaire Responses</h3>
-                    <p className="text-sm text-brand-muted">Upload spreadsheet exports from Smartsheet or similar (.xlsx, .csv)</p>
+                    <h3 className="font-semibold text-antenna-dark">Questionnaire Responses</h3>
+                    <p className="text-sm text-antenna-muted">Upload spreadsheet exports from Smartsheet or similar (.xlsx, .csv)</p>
                   </div>
 
                   <label className="upload-zone block text-center mb-4">
@@ -386,14 +468,14 @@ export default function Home() {
                       onChange={(e) => e.target.files && handleQuestionnaireUpload(e.target.files)}
                       className="hidden"
                     />
-                    <Upload className="w-8 h-8 mx-auto mb-2 text-brand-muted" />
-                    <p className="text-brand-muted">
+                    <Upload className="w-8 h-8 mx-auto mb-2 text-antenna-muted" />
+                    <p className="text-antenna-muted">
                       Drop spreadsheet files here or click to upload
                     </p>
                   </label>
 
                   {questionnaires.length > 0 && (
-                    <p className="text-sm text-brand-muted">
+                    <p className="text-sm text-antenna-dark font-medium">
                       {questionnaires.length} responses loaded
                     </p>
                   )}
@@ -405,8 +487,8 @@ export default function Home() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-medium text-brand-ink">Primary Audience Insights</h3>
-                      <p className="text-sm text-brand-muted">Define key audience segments and their characteristics</p>
+                      <h3 className="font-semibold text-antenna-dark">Primary Audience Insights</h3>
+                      <p className="text-sm text-antenna-muted">Define key audience segments and their characteristics</p>
                     </div>
                     <button onClick={addAudienceInsight} className="btn-secondary flex items-center gap-2">
                       <Plus className="w-4 h-4" />
@@ -416,7 +498,7 @@ export default function Home() {
 
                   <div className="space-y-4">
                     {audienceInsights.map((audience) => (
-                      <div key={audience.id} className="p-4 border border-brand-warm rounded-lg">
+                      <div key={audience.id} className="p-4 border border-antenna-border rounded-xl bg-antenna-bg/50">
                         <div className="flex items-start justify-between mb-3">
                           <input
                             type="text"
@@ -427,9 +509,9 @@ export default function Home() {
                           />
                           <button
                             onClick={() => removeAudienceInsight(audience.id)}
-                            className="p-1 hover:bg-brand-warm rounded"
+                            className="p-1 hover:bg-white rounded transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 text-brand-muted" />
+                            <Trash2 className="w-4 h-4 text-antenna-muted hover:text-antenna-error" />
                           </button>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -472,8 +554,8 @@ export default function Home() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-medium text-brand-ink">Competitor Insights</h3>
-                      <p className="text-sm text-brand-muted">Analyze competitive positioning and characteristics</p>
+                      <h3 className="font-semibold text-antenna-dark">Competitor Insights</h3>
+                      <p className="text-sm text-antenna-muted">Analyze competitive positioning and characteristics</p>
                     </div>
                     <button onClick={addCompetitorInsight} className="btn-secondary flex items-center gap-2">
                       <Plus className="w-4 h-4" />
@@ -483,7 +565,7 @@ export default function Home() {
 
                   <div className="space-y-4">
                     {competitorInsights.map((competitor) => (
-                      <div key={competitor.id} className="p-4 border border-brand-warm rounded-lg">
+                      <div key={competitor.id} className="p-4 border border-antenna-border rounded-xl bg-antenna-bg/50">
                         <div className="flex items-start justify-between mb-3">
                           <input
                             type="text"
@@ -494,9 +576,9 @@ export default function Home() {
                           />
                           <button
                             onClick={() => removeCompetitorInsight(competitor.id)}
-                            className="p-1 hover:bg-brand-warm rounded"
+                            className="p-1 hover:bg-white rounded transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 text-brand-muted" />
+                            <Trash2 className="w-4 h-4 text-antenna-muted hover:text-antenna-error" />
                           </button>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -548,8 +630,8 @@ export default function Home() {
                 <div>
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <h3 className="font-medium text-brand-ink">Assessor Comments</h3>
-                      <p className="text-sm text-brand-muted">Add observations and commentary from assessors</p>
+                      <h3 className="font-semibold text-antenna-dark">Assessor Comments</h3>
+                      <p className="text-sm text-antenna-muted">Add observations and commentary from assessors</p>
                     </div>
                     <button onClick={addAssessorComment} className="btn-secondary flex items-center gap-2">
                       <Plus className="w-4 h-4" />
@@ -559,7 +641,7 @@ export default function Home() {
 
                   <div className="space-y-4">
                     {assessorComments.map((comment) => (
-                      <div key={comment.id} className="p-4 border border-brand-warm rounded-lg">
+                      <div key={comment.id} className="p-4 border border-antenna-border rounded-xl bg-antenna-bg/50">
                         <div className="flex items-start justify-between mb-3">
                           <input
                             type="text"
@@ -570,9 +652,9 @@ export default function Home() {
                           />
                           <button
                             onClick={() => removeAssessorComment(comment.id)}
-                            className="p-1 hover:bg-brand-warm rounded"
+                            className="p-1 hover:bg-white rounded transition-colors"
                           >
-                            <Trash2 className="w-4 h-4 text-brand-muted" />
+                            <Trash2 className="w-4 h-4 text-antenna-muted hover:text-antenna-error" />
                           </button>
                         </div>
                         <textarea
@@ -614,21 +696,39 @@ export default function Home() {
         {/* Step 2: Findings */}
         {currentStep === 'findings' && findingsDocument && (
           <div className="animate-fade-in">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-center gap-3 mb-12 pt-4">
+              <div className="flex items-center gap-2">
+                <div className="progress-step completed"><Check className="w-4 h-4" /></div>
+                <span className="text-sm text-antenna-muted">Inputs</span>
+              </div>
+              <div className="w-12 h-px bg-antenna-border" />
+              <div className="flex items-center gap-2">
+                <div className="progress-step active">2</div>
+                <span className="text-sm font-medium text-antenna-dark">Findings</span>
+              </div>
+              <div className="w-12 h-px bg-antenna-border" />
+              <div className="flex items-center gap-2">
+                <div className="progress-step pending">3</div>
+                <span className="text-sm text-antenna-muted">Hypothesis</span>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-8">
               <div>
                 <button
-                  onClick={() => setCurrentStep('inputs')}
-                  className="flex items-center gap-2 text-brand-muted hover:text-brand-ink mb-2"
+                  onClick={() => { setCurrentStep('inputs'); setShowForm(true); }}
+                  className="flex items-center gap-2 text-antenna-muted hover:text-antenna-dark mb-2 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back to Inputs
                 </button>
-                <h2 className="section-title">Findings Document</h2>
-                <p className="text-brand-muted">Version {findingsDocument.version}</p>
+                <h2 className="text-3xl font-display font-bold text-antenna-dark">Findings Document</h2>
+                <p className="text-antenna-muted">Version {findingsDocument.version}</p>
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => setCurrentStep('inputs')}
+                  onClick={() => { setCurrentStep('inputs'); setShowForm(true); }}
                   className="btn-secondary flex items-center gap-2"
                 >
                   <RefreshCw className="w-4 h-4" />
@@ -661,17 +761,35 @@ export default function Home() {
         {/* Step 3: Hypothesis */}
         {currentStep === 'hypothesis' && brandHypothesis && (
           <div className="animate-fade-in">
+            {/* Progress Steps */}
+            <div className="flex items-center justify-center gap-3 mb-12 pt-4">
+              <div className="flex items-center gap-2">
+                <div className="progress-step completed"><Check className="w-4 h-4" /></div>
+                <span className="text-sm text-antenna-muted">Inputs</span>
+              </div>
+              <div className="w-12 h-px bg-antenna-border" />
+              <div className="flex items-center gap-2">
+                <div className="progress-step completed"><Check className="w-4 h-4" /></div>
+                <span className="text-sm text-antenna-muted">Findings</span>
+              </div>
+              <div className="w-12 h-px bg-antenna-border" />
+              <div className="flex items-center gap-2">
+                <div className="progress-step active">3</div>
+                <span className="text-sm font-medium text-antenna-dark">Hypothesis</span>
+              </div>
+            </div>
+
             <div className="flex items-center justify-between mb-8">
               <div>
                 <button
                   onClick={() => setCurrentStep('findings')}
-                  className="flex items-center gap-2 text-brand-muted hover:text-brand-ink mb-2"
+                  className="flex items-center gap-2 text-antenna-muted hover:text-antenna-dark mb-2 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Back to Findings
                 </button>
-                <h2 className="section-title">Brand Strategy Hypothesis</h2>
-                <p className="text-brand-muted">Version {brandHypothesis.version}</p>
+                <h2 className="text-3xl font-display font-bold text-antenna-dark">Brand Strategy Hypothesis</h2>
+                <p className="text-antenna-muted">Version {brandHypothesis.version}</p>
               </div>
               <div className="flex gap-3">
                 <button
@@ -688,6 +806,11 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      {/* Version Badge */}
+      <div className="version-badge">
+        v{APP_VERSION}
+      </div>
     </div>
   );
 }
