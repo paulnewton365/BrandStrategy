@@ -37,7 +37,7 @@ import HypothesisView from '@/components/HypothesisView';
 type Step = 'inputs' | 'findings' | 'hypothesis';
 
 // App version - update with each build
-const APP_VERSION = '1.2.2';
+const APP_VERSION = '1.2.3';
 
 // Antenna Logo Component
 function AntennaLogo() {
@@ -328,15 +328,17 @@ export default function Home() {
         })
       });
 
+      const data = await response.json();
+      
       if (!response.ok) {
-        throw new Error('Analysis failed');
+        throw new Error(data.error || 'Analysis failed');
       }
 
-      const data = await response.json();
       setFindingsDocument(data);
       setCurrentStep('findings');
     } catch (err) {
-      setError('Failed to analyze inputs. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to analyze inputs. Please try again.';
+      setError(errorMessage);
       console.error(err);
     } finally {
       setIsAnalyzing(false);
@@ -360,15 +362,17 @@ export default function Home() {
         })
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Generation failed');
+        throw new Error(data.error || 'Generation failed');
       }
 
-      const data = await response.json();
       setBrandHypothesis(data);
       setCurrentStep('hypothesis');
     } catch (err) {
-      setError('Failed to generate hypothesis. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to generate hypothesis. Please try again.';
+      setError(errorMessage);
       console.error(err);
     } finally {
       setIsGenerating(false);

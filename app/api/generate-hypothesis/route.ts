@@ -3,10 +3,21 @@ import Anthropic from '@anthropic-ai/sdk';
 import { HYPOTHESIS_PROMPT } from '@/lib/prompts';
 import { BrandHypothesis, FindingsDocument } from '@/types';
 
-const anthropic = new Anthropic();
-
 export async function POST(request: NextRequest) {
   try {
+    // Check for API key
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY is not set');
+      return NextResponse.json(
+        { error: 'API configuration error. Please check environment variables.' },
+        { status: 500 }
+      );
+    }
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
     const body = await request.json();
     const { findingsDocument, brandName } = body as { findingsDocument: FindingsDocument; brandName: string };
 
@@ -108,7 +119,7 @@ Return ONLY valid JSON, no markdown code blocks.`
 
       hypothesis = JSON.parse(jsonStr);
     } catch (parseError) {
-      console.error('Failed to parse AI response:', textContent.text);
+      console.error('Failed to parse AI response:', textContent.text.substring(0, 500));
       throw new Error('Failed to parse hypothesis response');
     }
 
@@ -140,8 +151,9 @@ Return ONLY valid JSON, no markdown code blocks.`
     return NextResponse.json(hypothesis);
   } catch (error) {
     console.error('Hypothesis generation error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to generate hypothesis' },
+      { error: `Failed to generate hypothesis: ${errorMessage}` },
       { status: 500 }
     );
   }

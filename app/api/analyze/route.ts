@@ -3,10 +3,21 @@ import Anthropic from '@anthropic-ai/sdk';
 import { ANALYSIS_PROMPT, buildAnalysisContext } from '@/lib/prompts';
 import { FindingsDocument } from '@/types';
 
-const anthropic = new Anthropic();
-
 export async function POST(request: NextRequest) {
   try {
+    // Check for API key
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY is not set');
+      return NextResponse.json(
+        { error: 'API configuration error. Please check environment variables.' },
+        { status: 500 }
+      );
+    }
+
+    const anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY,
+    });
+
     const body = await request.json();
     const { brandName, interviews, questionnaires, audienceInsights, competitorInsights, assessorComments } = body;
 
@@ -25,6 +36,8 @@ export async function POST(request: NextRequest) {
       competitorInsights: competitorInsights || [],
       assessorComments: assessorComments || []
     });
+
+    console.log('Context length:', context.length, 'characters');
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -74,7 +87,7 @@ Return ONLY valid JSON, no markdown code blocks.`
 
       findings = JSON.parse(jsonStr);
     } catch (parseError) {
-      console.error('Failed to parse AI response:', textContent.text);
+      console.error('Failed to parse AI response:', textContent.text.substring(0, 500));
       throw new Error('Failed to parse analysis response');
     }
 
@@ -106,8 +119,9 @@ Return ONLY valid JSON, no markdown code blocks.`
     return NextResponse.json(findings);
   } catch (error) {
     console.error('Analysis error:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to analyze inputs' },
+      { error: `Failed to analyze inputs: ${errorMessage}` },
       { status: 500 }
     );
   }
