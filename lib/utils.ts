@@ -103,10 +103,14 @@ export function truncateText(text: string, maxWords: number): string {
   return words.slice(0, maxWords).join(' ') + '...';
 }
 
-export function sanitizeForPDF(text: string | null | undefined): string {
-  if (!text) return '';
+export function sanitizeForPDF(text: unknown): string {
+  if (text === null || text === undefined) return '';
+  if (typeof text !== 'string') {
+    // Convert to string if it's a number, object, etc.
+    text = String(text);
+  }
   // Remove em-dashes and replace with regular dashes
-  return text
+  return (text as string)
     .replace(/\u2014/g, '-')
     .replace(/\u2013/g, '-')
     .replace(/—/g, '-')
