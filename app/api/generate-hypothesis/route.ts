@@ -99,17 +99,39 @@ Here are the findings to build the brand hypothesis from:
 
 ${findingsContext}
 
-Please create a brand strategy hypothesis and return a JSON object matching the BrandHypothesis structure. Remember:
-- Do NOT use em-dashes or en-dashes anywhere (use regular hyphens or rewrite)
-- What, Why, How statements: Maximum 140 words each, use "we" voice
-- Positioning statement: Maximum 150 words, use brand name (third person)
-- Total document should not exceed 1350 words
-- Values: Maximum 6
-- Personality traits: Maximum 6
-- Use authentic language from the research findings
-- Organizing idea should be pithy (3-6 words) with clear word-to-pillar mapping
+Please create a brand strategy hypothesis and return a JSON object with this EXACT structure:
+{
+  "whatStatement": "string - what the brand does (max 140 words, 'we' voice)",
+  "whyStatement": "string - why the brand does it (max 140 words, 'we' voice)",
+  "howStatement": "string - how the brand thinks/works/acts (max 140 words, 'we' voice)",
+  "organizingIdea": {
+    "statement": "string - 3-6 word pithy organizing idea",
+    "breakdown": [{ "word": "string", "meaning": "string", "mappedTo": "what|why|how" }]
+  },
+  "whyThisWorks": ["string - reason 1", "string - reason 2", ...],
+  "positioningStatement": "string - positioning using brand name (max 150 words)",
+  "brandHouse": {
+    "essence": "string - the core brand essence",
+    "promise": "string - what the brand delivers daily",
+    "mission": "string - ultimate goal",
+    "vision": "string - ownable future state",
+    "purpose": "string - higher-order reason for existence",
+    "values": [{ "name": "string", "description": "string" }],
+    "personality": [{ "name": "string", "description": "string" }]
+  },
+  "visualGuidance": "string - direction for visual expression",
+  "toneOfVoiceGuidance": "string - tone and messaging guidance"
+}
 
-Return ONLY valid JSON, no markdown code blocks.`
+CRITICAL RULES:
+- Return ONLY valid JSON - no markdown, no code blocks, no explanatory text
+- Do NOT use em-dashes (—) or en-dashes (–) anywhere - use regular hyphens (-) only
+- All string fields must be actual string values, not nested objects
+- Values array must have 3-6 items with name and description
+- Personality array must have 3-6 items with name and description
+- Use authentic language from the research findings
+
+Return the JSON object starting with { and ending with }`
         }
       ]
     });
@@ -189,11 +211,60 @@ Return ONLY valid JSON, no markdown code blocks.`
     hypothesis.brandHouse.mission = ensureString(hypothesis.brandHouse.mission);
     hypothesis.brandHouse.vision = ensureString(hypothesis.brandHouse.vision);
     hypothesis.brandHouse.purpose = ensureString(hypothesis.brandHouse.purpose);
+    
+    // Process values array - handle various formats
     if (!Array.isArray(hypothesis.brandHouse.values)) {
       hypothesis.brandHouse.values = [];
+    } else {
+      hypothesis.brandHouse.values = hypothesis.brandHouse.values.map((v: unknown) => {
+        if (typeof v === 'string') {
+          return { name: v, description: '' };
+        }
+        if (v && typeof v === 'object') {
+          const val = v as Record<string, unknown>;
+          return {
+            name: ensureString(val.name || val.title || val.value || ''),
+            description: ensureString(val.description || val.text || val.meaning || '')
+          };
+        }
+        return { name: '', description: '' };
+      }).filter((v: {name: string}) => v.name);
     }
+    
+    // Process personality array - handle various formats
     if (!Array.isArray(hypothesis.brandHouse.personality)) {
       hypothesis.brandHouse.personality = [];
+    } else {
+      hypothesis.brandHouse.personality = hypothesis.brandHouse.personality.map((p: unknown) => {
+        if (typeof p === 'string') {
+          return { name: p, description: '' };
+        }
+        if (p && typeof p === 'object') {
+          const trait = p as Record<string, unknown>;
+          return {
+            name: ensureString(trait.name || trait.title || trait.trait || ''),
+            description: ensureString(trait.description || trait.text || trait.meaning || '')
+          };
+        }
+        return { name: '', description: '' };
+      }).filter((p: {name: string}) => p.name);
+    }
+    
+    // Process organizingIdea breakdown
+    if (Array.isArray(hypothesis.organizingIdea.breakdown)) {
+      hypothesis.organizingIdea.breakdown = hypothesis.organizingIdea.breakdown.map((b: unknown) => {
+        if (b && typeof b === 'object') {
+          const item = b as Record<string, unknown>;
+          const mappedValue = ensureString(item.mappedTo || item.maps || item.pillar || 'what').toLowerCase();
+          const validMapped = ['what', 'why', 'how'].includes(mappedValue) ? mappedValue as 'what' | 'why' | 'how' : 'what';
+          return {
+            word: ensureString(item.word || item.term || ''),
+            meaning: ensureString(item.meaning || item.description || item.explanation || ''),
+            mappedTo: validMapped
+          };
+        }
+        return { word: '', meaning: '', mappedTo: 'what' as const };
+      }).filter((b: {word: string}) => b.word);
     }
 
     // Ensure whyThisWorks is an array

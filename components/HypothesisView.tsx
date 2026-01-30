@@ -21,11 +21,25 @@ export default function HypothesisView({ hypothesis, brandName }: HypothesisView
     return <div className="card p-8 text-center text-antenna-muted">No hypothesis data available.</div>;
   }
 
-  // Safe accessors
+  // Safe accessors for strings
+  const whatStatement = typeof hypothesis.whatStatement === 'string' ? hypothesis.whatStatement : '';
+  const whyStatement = typeof hypothesis.whyStatement === 'string' ? hypothesis.whyStatement : '';
+  const howStatement = typeof hypothesis.howStatement === 'string' ? hypothesis.howStatement : '';
+  const positioningStatement = typeof hypothesis.positioningStatement === 'string' ? hypothesis.positioningStatement : '';
+  const visualGuidance = typeof hypothesis.visualGuidance === 'string' ? hypothesis.visualGuidance : '';
+  const toneOfVoiceGuidance = typeof hypothesis.toneOfVoiceGuidance === 'string' ? hypothesis.toneOfVoiceGuidance : '';
+  
+  // Safe accessors for objects/arrays
   const organizingIdea = hypothesis.organizingIdea || { statement: '', breakdown: [] };
+  const organizingStatement = typeof organizingIdea.statement === 'string' ? organizingIdea.statement : '';
   const breakdown = Array.isArray(organizingIdea.breakdown) ? organizingIdea.breakdown : [];
   const whyThisWorks = Array.isArray(hypothesis.whyThisWorks) ? hypothesis.whyThisWorks : [];
   const brandHouse = hypothesis.brandHouse || { essence: '', promise: '', mission: '', vision: '', purpose: '', values: [], personality: [] };
+  const essence = typeof brandHouse.essence === 'string' ? brandHouse.essence : '';
+  const promise = typeof brandHouse.promise === 'string' ? brandHouse.promise : '';
+  const mission = typeof brandHouse.mission === 'string' ? brandHouse.mission : '';
+  const vision = typeof brandHouse.vision === 'string' ? brandHouse.vision : '';
+  const purpose = typeof brandHouse.purpose === 'string' ? brandHouse.purpose : '';
   const values = Array.isArray(brandHouse.values) ? brandHouse.values : [];
   const personality = Array.isArray(brandHouse.personality) ? brandHouse.personality : [];
 
@@ -33,38 +47,62 @@ export default function HypothesisView({ hypothesis, brandName }: HypothesisView
     setIsExporting(true);
     setShowExportMenu(false);
     
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && contentRef.current) {
       const { jsPDF } = await import('jspdf');
       const html2canvas = (await import('html2canvas')).default;
       
-      if (contentRef.current) {
-        const canvas = await html2canvas(contentRef.current, {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const margin = 10;
+      const usableHeight = pageHeight - (margin * 2);
+      const contentWidth = pageWidth - (margin * 2);
+      
+      // Get all card sections
+      const sections = contentRef.current.querySelectorAll('.card');
+      let currentY = margin;
+      let pageNum = 1;
+      
+      for (let i = 0; i < sections.length; i++) {
+        const section = sections[i] as HTMLElement;
+        
+        // Render section to canvas
+        const canvas = await html2canvas(section, {
           scale: 2,
           useCORS: true,
           logging: false,
-          backgroundColor: '#f0ede8'
+          backgroundColor: '#ffffff'
         });
         
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
+        const imgWidth = contentWidth;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
-        let position = 0;
-        let heightLeft = imgHeight;
-        
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
-        
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
+        // Check if section fits on current page
+        if (currentY + imgHeight > pageHeight - margin && currentY > margin) {
           pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= 297;
+          pageNum++;
+          currentY = margin;
         }
         
-        pdf.save(`${brandName}_Brand_Hypothesis_v${hypothesis.version}.pdf`);
+        // If section is taller than usable page height, scale it down
+        if (imgHeight > usableHeight) {
+          const scale = usableHeight / imgHeight;
+          const scaledWidth = imgWidth * scale;
+          const scaledHeight = usableHeight;
+          const xOffset = margin + (contentWidth - scaledWidth) / 2;
+          
+          pdf.addImage(imgData, 'PNG', xOffset, currentY, scaledWidth, scaledHeight);
+          pdf.addPage();
+          pageNum++;
+          currentY = margin;
+        } else {
+          pdf.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
+          currentY += imgHeight + 5; // 5mm gap between sections
+        }
       }
+      
+      pdf.save(`${brandName}_Brand_Hypothesis_v${hypothesis.version || '1.0.0'}.pdf`);
     }
     setIsExporting(false);
   };
@@ -140,74 +178,82 @@ export default function HypothesisView({ hypothesis, brandName }: HypothesisView
               <p className="text-antenna-muted">Brand Strategy and Creative Direction</p>
             </div>
             <div className="text-right text-sm text-antenna-muted">
-              <p className="tag mb-2">v{hypothesis.version}</p>
-              <p>{formatDate(new Date(hypothesis.generatedAt))}</p>
+              <p className="tag mb-2">v{hypothesis.version || '1.0.0'}</p>
+              <p>{formatDate(hypothesis.generatedAt)}</p>
             </div>
           </div>
         </div>
 
         {/* What Statement */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
-            <div className="icon-box !mb-0">
-              <Target strokeWidth={1.5} />
-            </div>
-            What {brandName} Does
-          </h2>
-          <p className="text-antenna-text leading-relaxed text-lg">
-            {sanitizeForPDF(hypothesis.whatStatement)}
-          </p>
-        </div>
+        {whatStatement && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Target strokeWidth={1.5} />
+              </div>
+              What {brandName} Does
+            </h2>
+            <p className="text-antenna-text leading-relaxed text-lg">
+              {sanitizeForPDF(whatStatement)}
+            </p>
+          </div>
+        )}
 
         {/* Why Statement */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
-            <div className="icon-box !mb-0">
-              <Heart strokeWidth={1.5} />
-            </div>
-            Why {brandName} Does It
-          </h2>
-          <p className="text-antenna-text leading-relaxed text-lg">
-            {sanitizeForPDF(hypothesis.whyStatement)}
-          </p>
-        </div>
+        {whyStatement && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Heart strokeWidth={1.5} />
+              </div>
+              Why {brandName} Does It
+            </h2>
+            <p className="text-antenna-text leading-relaxed text-lg">
+              {sanitizeForPDF(whyStatement)}
+            </p>
+          </div>
+        )}
 
         {/* How Statement */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
-            <div className="icon-box !mb-0">
-              <Sparkles strokeWidth={1.5} />
-            </div>
-            How {brandName} Thinks, Works & Acts
-          </h2>
-          <p className="text-antenna-text leading-relaxed text-lg">
-            {sanitizeForPDF(hypothesis.howStatement)}
-          </p>
-        </div>
+        {howStatement && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Sparkles strokeWidth={1.5} />
+              </div>
+              How {brandName} Thinks, Works & Acts
+            </h2>
+            <p className="text-antenna-text leading-relaxed text-lg">
+              {sanitizeForPDF(howStatement)}
+            </p>
+          </div>
+        )}
 
         {/* Organizing Idea */}
-        <div className="card p-8 bg-antenna-dark text-white">
-          <h2 className="text-xl font-display font-semibold mb-6">
-            An Organizing Idea
-          </h2>
-          <p className="text-3xl font-display font-bold mb-8">
-            <span className="bg-antenna-accent text-antenna-dark px-2 py-1">{sanitizeForPDF(organizingIdea.statement)}</span>
-          </p>
-          {breakdown.length > 0 && (
-            <div className="space-y-3">
-              {breakdown.map((item, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <span className="px-3 py-1 bg-antenna-accent text-antenna-dark rounded font-semibold text-sm">
-                    {item?.word || ''}
-                  </span>
-                  <span className="text-white/80">
-                    = {sanitizeForPDF(item?.meaning || '')} <span className="text-white/50">({item?.mappedTo === 'what' ? 'What we do' : item?.mappedTo === 'why' ? 'Why we do it' : 'How we act'})</span>
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {organizingStatement && (
+          <div className="card p-8 bg-antenna-dark text-white">
+            <h2 className="text-xl font-display font-semibold mb-6">
+              An Organizing Idea
+            </h2>
+            <p className="text-3xl font-display font-bold mb-8">
+              <span className="bg-antenna-accent text-antenna-dark px-2 py-1">{sanitizeForPDF(organizingStatement)}</span>
+            </p>
+            {breakdown.length > 0 && (
+              <div className="space-y-3">
+                {breakdown.map((item, index) => (
+                  <div key={index} className="flex items-start gap-3">
+                    <span className="px-3 py-1 bg-antenna-accent text-antenna-dark rounded font-semibold text-sm">
+                      {item?.word || ''}
+                    </span>
+                    <span className="text-white/80">
+                      = {sanitizeForPDF(item?.meaning || '')} <span className="text-white/50">({item?.mappedTo === 'what' ? 'What we do' : item?.mappedTo === 'why' ? 'Why we do it' : 'How we act'})</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Why This Works */}
         {whyThisWorks.length > 0 && (
@@ -227,100 +273,118 @@ export default function HypothesisView({ hypothesis, brandName }: HypothesisView
         )}
 
         {/* Positioning Statement */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4">
-            A Brand Positioning Statement
-          </h2>
-          <p className="text-antenna-text leading-relaxed text-lg">
-            {sanitizeForPDF(hypothesis.positioningStatement)}
-          </p>
-        </div>
+        {positioningStatement && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4">
+              A Brand Positioning Statement
+            </h2>
+            <p className="text-antenna-text leading-relaxed text-lg">
+              {sanitizeForPDF(positioningStatement)}
+            </p>
+          </div>
+        )}
 
         {/* Brand House */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6">
-            A Brand House Hypothesis
-          </h2>
-          <div className="space-y-6">
-            <div className="p-4 bg-antenna-accent/30 border-l-4 border-antenna-accent rounded-r-lg">
-              <h3 className="font-semibold text-antenna-dark mb-1">Essence</h3>
-              <p className="text-antenna-muted italic">{sanitizeForPDF(brandHouse.essence)}</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-antenna-bg rounded-xl">
-                <h3 className="font-semibold text-antenna-dark mb-1">Promise</h3>
-                <p className="text-antenna-muted text-sm">{sanitizeForPDF(brandHouse.promise)}</p>
-              </div>
-              <div className="p-4 bg-antenna-bg rounded-xl">
-                <h3 className="font-semibold text-antenna-dark mb-1">Mission</h3>
-                <p className="text-antenna-muted text-sm">{sanitizeForPDF(brandHouse.mission)}</p>
-              </div>
-              <div className="p-4 bg-antenna-bg rounded-xl">
-                <h3 className="font-semibold text-antenna-dark mb-1">Vision</h3>
-                <p className="text-antenna-muted text-sm">{sanitizeForPDF(brandHouse.vision)}</p>
-              </div>
-              <div className="p-4 bg-antenna-bg rounded-xl">
-                <h3 className="font-semibold text-antenna-dark mb-1">Purpose</h3>
-                <p className="text-antenna-muted text-sm">{sanitizeForPDF(brandHouse.purpose)}</p>
-              </div>
-            </div>
-
-            {values.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-antenna-dark mb-3">Brand Values</h3>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {values.map((value, index) => (
-                    <div key={index} className="p-3 border border-antenna-border rounded-xl hover:shadow-card-hover transition-shadow">
-                      <h4 className="font-medium text-antenna-dark">{value?.name || ''}</h4>
-                      <p className="text-sm text-antenna-muted mt-1">{sanitizeForPDF(value?.description || '')}</p>
-                    </div>
-                  ))}
+        {(essence || promise || mission || vision || purpose || values.length > 0 || personality.length > 0) && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6">
+              A Brand House Hypothesis
+            </h2>
+            <div className="space-y-6">
+              {essence && (
+                <div className="p-4 bg-antenna-accent/30 border-l-4 border-antenna-accent rounded-r-lg">
+                  <h3 className="font-semibold text-antenna-dark mb-1">Essence</h3>
+                  <p className="text-antenna-muted italic">{sanitizeForPDF(essence)}</p>
                 </div>
+              )}
+              
+              <div className="grid md:grid-cols-2 gap-4">
+                {promise && (
+                  <div className="p-4 bg-antenna-bg rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-1">Promise</h3>
+                    <p className="text-antenna-muted text-sm">{sanitizeForPDF(promise)}</p>
+                  </div>
+                )}
+                {mission && (
+                  <div className="p-4 bg-antenna-bg rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-1">Mission</h3>
+                    <p className="text-antenna-muted text-sm">{sanitizeForPDF(mission)}</p>
+                  </div>
+                )}
+                {vision && (
+                  <div className="p-4 bg-antenna-bg rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-1">Vision</h3>
+                    <p className="text-antenna-muted text-sm">{sanitizeForPDF(vision)}</p>
+                  </div>
+                )}
+                {purpose && (
+                  <div className="p-4 bg-antenna-bg rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-1">Purpose</h3>
+                    <p className="text-antenna-muted text-sm">{sanitizeForPDF(purpose)}</p>
+                  </div>
+                )}
               </div>
-            )}
 
-            {personality.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-antenna-dark mb-3">Brand Personality</h3>
-                <div className="grid md:grid-cols-2 gap-3">
-                  {personality.map((trait, index) => (
-                    <div key={index} className="p-3 border border-antenna-border rounded-xl hover:shadow-card-hover transition-shadow">
-                      <h4 className="font-medium text-antenna-dark">{trait?.name || ''}</h4>
-                      <p className="text-sm text-antenna-muted mt-1">{sanitizeForPDF(trait?.description || '')}</p>
-                    </div>
-                  ))}
+              {values.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-antenna-dark mb-3">Brand Values</h3>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {values.map((value, index) => (
+                      <div key={index} className="p-3 border border-antenna-border rounded-xl hover:shadow-card-hover transition-shadow">
+                        <h4 className="font-medium text-antenna-dark">{value?.name || ''}</h4>
+                        <p className="text-sm text-antenna-muted mt-1">{sanitizeForPDF(value?.description || '')}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+
+              {personality.length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-antenna-dark mb-3">Brand Personality</h3>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    {personality.map((trait, index) => (
+                      <div key={index} className="p-3 border border-antenna-border rounded-xl hover:shadow-card-hover transition-shadow">
+                        <h4 className="font-medium text-antenna-dark">{trait?.name || ''}</h4>
+                        <p className="text-sm text-antenna-muted mt-1">{sanitizeForPDF(trait?.description || '')}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Visual Guidance */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
-            <div className="icon-box !mb-0">
-              <Palette strokeWidth={1.5} />
+        {visualGuidance && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Palette strokeWidth={1.5} />
+              </div>
+              Brand Guidance For Visual Expression
+            </h2>
+            <div className="text-antenna-muted leading-relaxed whitespace-pre-line">
+              {sanitizeForPDF(visualGuidance)}
             </div>
-            Brand Guidance For Visual Expression
-          </h2>
-          <div className="text-antenna-muted leading-relaxed whitespace-pre-line">
-            {sanitizeForPDF(hypothesis.visualGuidance)}
           </div>
-        </div>
+        )}
 
         {/* Tone of Voice */}
-        <div className="card p-8">
-          <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
-            <div className="icon-box !mb-0">
-              <MessageSquare strokeWidth={1.5} />
+        {toneOfVoiceGuidance && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <MessageSquare strokeWidth={1.5} />
+              </div>
+              Brand Guidance For Tone of Voice
+            </h2>
+            <div className="text-antenna-muted leading-relaxed whitespace-pre-line">
+              {sanitizeForPDF(toneOfVoiceGuidance)}
             </div>
-            Brand Guidance For Tone of Voice
-          </h2>
-          <div className="text-antenna-muted leading-relaxed whitespace-pre-line">
-            {sanitizeForPDF(hypothesis.toneOfVoiceGuidance)}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

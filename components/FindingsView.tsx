@@ -31,29 +31,52 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
       const html2canvas = (await import('html2canvas')).default;
       
       if (contentRef.current) {
-        const canvas = await html2canvas(contentRef.current, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          backgroundColor: '#f0ede8'
-        });
-        
-        const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const pageWidth = 210;
+        const pageHeight = 297;
+        const margin = 10;
+        const usableHeight = pageHeight - (margin * 2);
+        const contentWidth = pageWidth - (margin * 2);
         
-        let position = 0;
-        let heightLeft = imgHeight;
+        // Get all card sections
+        const sections = contentRef.current.querySelectorAll('.card');
+        let currentY = margin;
         
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
-        
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-          heightLeft -= 297;
+        for (let i = 0; i < sections.length; i++) {
+          const section = sections[i] as HTMLElement;
+          
+          // Render section to canvas
+          const canvas = await html2canvas(section, {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+          });
+          
+          const imgData = canvas.toDataURL('image/png');
+          const imgWidth = contentWidth;
+          const imgHeight = (canvas.height * imgWidth) / canvas.width;
+          
+          // Check if section fits on current page
+          if (currentY + imgHeight > pageHeight - margin && currentY > margin) {
+            pdf.addPage();
+            currentY = margin;
+          }
+          
+          // If section is taller than usable page height, scale it down
+          if (imgHeight > usableHeight) {
+            const scale = usableHeight / imgHeight;
+            const scaledWidth = imgWidth * scale;
+            const scaledHeight = usableHeight;
+            const xOffset = margin + (contentWidth - scaledWidth) / 2;
+            
+            pdf.addImage(imgData, 'PNG', xOffset, currentY, scaledWidth, scaledHeight);
+            pdf.addPage();
+            currentY = margin;
+          } else {
+            pdf.addImage(imgData, 'PNG', margin, currentY, imgWidth, imgHeight);
+            currentY += imgHeight + 5;
+          }
         }
         
         pdf.save(`${brandName}_Findings_v${findings.version || '1.0.0'}.pdf`);
