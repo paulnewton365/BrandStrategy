@@ -98,6 +98,22 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
   const audienceAnalyses = findings.audienceAnalyses || [];
   const strategicDirection = findings.strategicDirection || {};
 
+  // Helper function to safely convert to array
+  const toArray = <T,>(value: unknown): T[] => {
+    if (Array.isArray(value)) return value as T[];
+    if (value !== null && value !== undefined && value !== '') {
+      return [value] as T[];
+    }
+    return [];
+  };
+
+  // Helper for string arrays specifically
+  const toStringArray = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.map(v => String(v));
+    if (typeof value === 'string' && value.trim()) return [value];
+    return [];
+  };
+
   return (
     <div>
       <div className="flex justify-end mb-4 no-print relative">
@@ -186,9 +202,9 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                     <span className="tag text-xs">{finding.source || 'Research'}</span>
                   </div>
                   <p className="text-antenna-muted mb-3">{sanitizeForPDF(finding.finding)}</p>
-                  {(finding.supportingQuotes || []).length > 0 && (
+                  {toArray(finding?.supportingQuotes).length > 0 && (
                     <div className="space-y-2">
-                      {(finding.supportingQuotes || []).map((quote, qi) => (
+                      {toArray(finding?.supportingQuotes).map((quote, qi) => (
                         <blockquote key={qi} className="flex items-start gap-3 text-sm italic text-antenna-muted bg-antenna-bg p-3 rounded-lg">
                           <Quote className="w-4 h-4 flex-shrink-0 mt-1 text-antenna-muted" />
                           <span>"{sanitizeForPDF(quote)}"</span>
@@ -203,7 +219,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
         )}
 
         {/* IDI Findings */}
-        {(idiFindings.summary || (idiFindings.keyInsights || []).length > 0) && (
+        {(idiFindings.summary || toArray(idiFindings?.keyInsights).length > 0) && (
           <div className="card p-8">
             <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
               <div className="icon-box !mb-0">
@@ -214,11 +230,11 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
             {idiFindings.summary && (
               <p className="text-antenna-text mb-6">{sanitizeForPDF(idiFindings.summary)}</p>
             )}
-            {(idiFindings.keyInsights || []).length > 0 && (
+            {toArray(idiFindings?.keyInsights).length > 0 && (
               <div className="mb-6">
                 <h3 className="font-semibold text-antenna-dark mb-3">Key Insights</h3>
                 <ul className="space-y-2">
-                  {(idiFindings.keyInsights || []).map((insight, i) => (
+                  {toArray(idiFindings?.keyInsights).map((insight, i) => (
                     <li key={i} className="flex items-start gap-2 text-antenna-muted">
                       <span className="w-1.5 h-1.5 rounded-full bg-antenna-accent mt-2 flex-shrink-0" />
                       {sanitizeForPDF(insight)}
@@ -227,11 +243,11 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                 </ul>
               </div>
             )}
-            {(idiFindings.quotes || []).length > 0 && (
+            {toArray(idiFindings?.quotes).length > 0 && (
               <div>
                 <h3 className="font-semibold text-antenna-dark mb-3">Notable Quotes</h3>
                 <div className="space-y-2">
-                  {(idiFindings.quotes || []).map((quote, i) => (
+                  {toArray(idiFindings?.quotes).map((quote, i) => (
                     <blockquote key={i} className="flex items-start gap-3 text-sm italic text-antenna-muted bg-antenna-bg p-3 rounded-lg">
                       <Quote className="w-4 h-4 flex-shrink-0 mt-1" />
                       <span>"{sanitizeForPDF(quote)}"</span>
@@ -244,7 +260,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
         )}
 
         {/* Questionnaire Findings */}
-        {(questionnaireFindings.summary || (questionnaireFindings.keyInsights || []).length > 0) && (
+        {(questionnaireFindings.summary || toArray(questionnaireFindings?.keyInsights).length > 0) && (
           <div className="card p-8">
             <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
               <div className="icon-box !mb-0">
@@ -255,11 +271,11 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
             {questionnaireFindings.summary && (
               <p className="text-antenna-text mb-6">{sanitizeForPDF(questionnaireFindings.summary)}</p>
             )}
-            {(questionnaireFindings.keyInsights || []).length > 0 && (
+            {toArray(questionnaireFindings?.keyInsights).length > 0 && (
               <div className="mb-6">
                 <h3 className="font-semibold text-antenna-dark mb-3">Key Insights</h3>
                 <ul className="space-y-2">
-                  {(questionnaireFindings.keyInsights || []).map((insight, i) => (
+                  {toArray(questionnaireFindings?.keyInsights).map((insight, i) => (
                     <li key={i} className="flex items-start gap-2 text-antenna-muted">
                       <span className="w-1.5 h-1.5 rounded-full bg-antenna-accent mt-2 flex-shrink-0" />
                       {sanitizeForPDF(insight)}
@@ -268,11 +284,11 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                 </ul>
               </div>
             )}
-            {(questionnaireFindings.responseHighlights || []).length > 0 && (
+            {toArray(questionnaireFindings?.responseHighlights).length > 0 && (
               <div>
                 <h3 className="font-semibold text-antenna-dark mb-3">Response Highlights</h3>
                 <ul className="space-y-2">
-                  {(questionnaireFindings.responseHighlights || []).map((highlight, i) => (
+                  {toArray(questionnaireFindings?.responseHighlights).map((highlight, i) => (
                     <li key={i} className="text-sm text-antenna-muted bg-antenna-bg p-3 rounded-lg">
                       {sanitizeForPDF(highlight)}
                     </li>
@@ -299,9 +315,9 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                   {audience.summary && (
                     <p className="text-antenna-muted mb-4">{sanitizeForPDF(audience.summary)}</p>
                   )}
-                  {(audience.keyInsights || []).length > 0 && (
+                  {toArray(audience?.keyInsights).length > 0 && (
                     <ul className="space-y-2">
-                      {(audience.keyInsights || []).map((insight, i) => (
+                      {toArray(audience?.keyInsights).map((insight, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm text-antenna-muted">
                           <span className="w-1.5 h-1.5 rounded-full bg-antenna-accent mt-1.5 flex-shrink-0" />
                           {sanitizeForPDF(insight)}
@@ -325,46 +341,52 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
               Competitor Insights
             </h2>
             <div className="space-y-6">
-              {competitorInsightFindings.map((competitor, index) => (
-                <div key={index} className="p-5 border border-antenna-border rounded-xl">
-                  <h3 className="font-semibold text-antenna-dark mb-3">{competitor.competitorName || 'Competitor'}</h3>
-                  {competitor.positioning && (
-                    <p className="text-antenna-muted mb-4">
-                      <span className="font-medium text-antenna-dark">Positioning: </span>
-                      {sanitizeForPDF(competitor.positioning)}
-                    </p>
-                  )}
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {(competitor.keyDifferentiators || []).length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-green-600 mb-2">Key Differentiators</h4>
-                        <ul className="space-y-1">
-                          {(competitor.keyDifferentiators || []).map((diff, i) => (
-                            <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(diff)}</li>
-                          ))}
-                        </ul>
-                      </div>
+              {competitorInsightFindings.map((competitor, index) => {
+                const differentiators = toArray(competitor?.keyDifferentiators);
+                const weaknesses = toArray(competitor?.weaknesses);
+                return (
+                  <div key={index} className="p-5 border border-antenna-border rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-3">{competitor.competitorName || 'Competitor'}</h3>
+                    {competitor.positioning && (
+                      <p className="text-antenna-muted mb-4">
+                        <span className="font-medium text-antenna-dark">Positioning: </span>
+                        {sanitizeForPDF(competitor.positioning)}
+                      </p>
                     )}
-                    {(competitor.weaknesses || []).length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-red-600 mb-2">Weaknesses</h4>
-                        <ul className="space-y-1">
-                          {(competitor.weaknesses || []).map((weak, i) => (
-                            <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(weak)}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    <div className="grid md:grid-cols-2 gap-4">
+                      {differentiators.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-green-600 mb-2">Key Differentiators</h4>
+                          <ul className="space-y-1">
+                            {differentiators.map((diff, i) => (
+                              <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(diff)}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {weaknesses.length > 0 && (
+                        <div>
+                          <h4 className="text-sm font-medium text-red-600 mb-2">Weaknesses</h4>
+                          <ul className="space-y-1">
+                            {weaknesses.map((weak, i) => (
+                              <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(weak)}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Content Analysis */}
-        {(contentAnalysis.wordsToUse?.length > 0 || contentAnalysis.wordsToAvoid?.length > 0 || 
-          contentAnalysis.phrasesToUse?.length > 0 || contentAnalysis.phrasesToAvoid?.length > 0) && (
+        {(Array.isArray(contentAnalysis.wordsToUse) && contentAnalysis.wordsToUse.length > 0 || 
+          Array.isArray(contentAnalysis.wordsToAvoid) && contentAnalysis.wordsToAvoid.length > 0 || 
+          Array.isArray(contentAnalysis.phrasesToUse) && contentAnalysis.phrasesToUse.length > 0 || 
+          Array.isArray(contentAnalysis.phrasesToAvoid) && contentAnalysis.phrasesToAvoid.length > 0) && (
           <div className="card p-8">
             <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
               <div className="icon-box !mb-0">
@@ -374,69 +396,69 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
               {/* Words to Use */}
-              {(contentAnalysis.wordsToUse || []).length > 0 && (
+              {Array.isArray(contentAnalysis.wordsToUse) && contentAnalysis.wordsToUse.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-green-700 mb-4 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
                     Words to Use
                   </h3>
                   <div className="space-y-2">
-                    {(contentAnalysis.wordsToUse || []).map((item, i) => (
+                    {contentAnalysis.wordsToUse.map((item, i) => (
                       <div key={i} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="font-medium text-green-800">"{item.word || ''}"</p>
-                        {item.frequency && <p className="text-xs text-green-600">Used {item.frequency}x</p>}
-                        {item.context && <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(item.context)}</p>}
+                        <p className="font-medium text-green-800">"{item?.word || ''}"</p>
+                        {item?.frequency && <p className="text-xs text-green-600">Used {item.frequency}x</p>}
+                        {item?.context && <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(item.context)}</p>}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               {/* Words to Avoid */}
-              {(contentAnalysis.wordsToAvoid || []).length > 0 && (
+              {Array.isArray(contentAnalysis.wordsToAvoid) && contentAnalysis.wordsToAvoid.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-red-700 mb-4 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-red-500" />
                     Words to Avoid
                   </h3>
                   <div className="space-y-2">
-                    {(contentAnalysis.wordsToAvoid || []).map((item, i) => (
+                    {contentAnalysis.wordsToAvoid.map((item, i) => (
                       <div key={i} className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="font-medium text-red-800">"{item.word || ''}"</p>
-                        {item.reason && <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(item.reason)}</p>}
+                        <p className="font-medium text-red-800">"{item?.word || ''}"</p>
+                        {item?.reason && <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(item.reason)}</p>}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               {/* Phrases to Use */}
-              {(contentAnalysis.phrasesToUse || []).length > 0 && (
+              {Array.isArray(contentAnalysis.phrasesToUse) && contentAnalysis.phrasesToUse.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-green-700 mb-4 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
                     Phrases to Use
                   </h3>
                   <div className="space-y-2">
-                    {(contentAnalysis.phrasesToUse || []).map((item, i) => (
+                    {contentAnalysis.phrasesToUse.map((item, i) => (
                       <div key={i} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="font-medium text-green-800">"{item.phrase || ''}"</p>
-                        {item.context && <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(item.context)}</p>}
+                        <p className="font-medium text-green-800">"{item?.phrase || ''}"</p>
+                        {item?.context && <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(item.context)}</p>}
                       </div>
                     ))}
                   </div>
                 </div>
               )}
               {/* Phrases to Avoid */}
-              {(contentAnalysis.phrasesToAvoid || []).length > 0 && (
+              {Array.isArray(contentAnalysis.phrasesToAvoid) && contentAnalysis.phrasesToAvoid.length > 0 && (
                 <div>
                   <h3 className="font-semibold text-red-700 mb-4 flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-red-500" />
                     Phrases to Avoid
                   </h3>
                   <div className="space-y-2">
-                    {(contentAnalysis.phrasesToAvoid || []).map((item, i) => (
+                    {contentAnalysis.phrasesToAvoid.map((item, i) => (
                       <div key={i} className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="font-medium text-red-800">"{item.phrase || ''}"</p>
-                        {item.reason && <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(item.reason)}</p>}
+                        <p className="font-medium text-red-800">"{item?.phrase || ''}"</p>
+                        {item?.reason && <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(item.reason)}</p>}
                       </div>
                     ))}
                   </div>
@@ -558,10 +580,10 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                       <span className="font-medium text-antenna-dark">Rationale:</span> {sanitizeForPDF(opportunity.rationale)}
                     </p>
                   )}
-                  {(opportunity.supportingQuotes || []).length > 0 && (
+                  {toArray(opportunity?.supportingQuotes).length > 0 && (
                     <div className="space-y-2 mt-4 pt-4 border-t border-antenna-border">
                       <p className="text-xs font-medium text-antenna-muted uppercase tracking-wide">Supporting Evidence</p>
-                      {(opportunity.supportingQuotes || []).map((quote, qi) => (
+                      {toArray(opportunity?.supportingQuotes).map((quote, qi) => (
                         <blockquote key={qi} className="flex items-start gap-3 text-sm italic text-antenna-muted bg-antenna-bg p-3 rounded-lg">
                           <Quote className="w-4 h-4 flex-shrink-0 mt-1" />
                           <span>"{sanitizeForPDF(quote)}"</span>
@@ -595,7 +617,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                         Disconnects
                       </h4>
                       <ul className="space-y-1">
-                        {(audience.disconnects || []).map((item, i) => (
+                        {toArray(audience?.disconnects).map((item, i) => (
                           <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(item)}</li>
                         ))}
                       </ul>
@@ -606,7 +628,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                         Barriers
                       </h4>
                       <ul className="space-y-1">
-                        {(audience.barriers || []).map((item, i) => (
+                        {toArray(audience?.barriers).map((item, i) => (
                           <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(item)}</li>
                         ))}
                       </ul>
@@ -617,7 +639,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
                         Opportunities
                       </h4>
                       <ul className="space-y-1">
-                        {(audience.opportunities || []).map((item, i) => (
+                        {toArray(audience?.opportunities).map((item, i) => (
                           <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(item)}</li>
                         ))}
                       </ul>
