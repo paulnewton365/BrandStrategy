@@ -28,44 +28,63 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build context from findings
+    // Build context from findings with defensive checks
+    const themes = findingsDocument.themes || [];
+    const tensions = findingsDocument.tensions || [];
+    const opportunities = findingsDocument.opportunities || [];
+    const keyPhrasesToUse = findingsDocument.keyPhrases?.toUse || [];
+    const keyPhrasesToAvoid = findingsDocument.keyPhrases?.toAvoid || [];
+    const audienceAnalyses = findingsDocument.audienceAnalyses || [];
+    const strategicDirection = findingsDocument.strategicDirection || {};
+    const keyFindings = findingsDocument.keyFindings || [];
+    const contentAnalysis = findingsDocument.contentAnalysis || {};
+
     const findingsContext = `
 BRAND NAME: ${brandName}
 
 FINDINGS DOCUMENT SUMMARY:
 
 EXECUTIVE SUMMARY:
-${findingsDocument.executiveSummary}
+${findingsDocument.executiveSummary || 'Not provided'}
+
+KEY FINDINGS:
+${keyFindings.map((f, i) => `${i + 1}. ${f.title || 'Finding'}: ${f.finding || ''}`).join('\n') || 'Not provided'}
 
 KEY THEMES:
-${findingsDocument.themes.map((t, i) => `${i + 1}. ${t.title}: ${t.description}\n   Quotes: ${t.quotes.map(q => `"${q}"`).join(', ')}`).join('\n')}
+${themes.map((t, i) => `${i + 1}. ${t.title || 'Theme'}: ${t.description || ''}\n   Quotes: ${(t.quotes || []).map(q => `"${q}"`).join(', ')}`).join('\n') || 'Not provided'}
 
 BRAND TENSIONS:
-${findingsDocument.tensions.map((t, i) => `${i + 1}. ${t.title} (${t.pole1} vs ${t.pole2}): ${t.description}`).join('\n')}
+${tensions.map((t, i) => `${i + 1}. ${t.title || 'Tension'} (${t.pole1 || ''} vs ${t.pole2 || ''}): ${t.description || ''}\n   How to reconcile: ${t.reconciliation || 'Not specified'}`).join('\n') || 'Not provided'}
 
 STRATEGIC OPPORTUNITIES:
-${findingsDocument.opportunities.map((o, i) => `${i + 1}. ${o.title}: ${o.description} - Rationale: ${o.rationale}`).join('\n')}
+${opportunities.map((o, i) => `${i + 1}. ${o.title || 'Opportunity'}: ${o.description || ''} - Rationale: ${o.rationale || ''}`).join('\n') || 'Not provided'}
+
+CONTENT ANALYSIS - WORDS TO USE:
+${Array.isArray(contentAnalysis.wordsToUse) ? contentAnalysis.wordsToUse.map(w => `- "${w.word || ''}" (${w.context || ''})`).join('\n') : 'Not provided'}
+
+CONTENT ANALYSIS - WORDS TO AVOID:
+${Array.isArray(contentAnalysis.wordsToAvoid) ? contentAnalysis.wordsToAvoid.map(w => `- "${w.word || ''}" (${w.reason || ''})`).join('\n') : 'Not provided'}
 
 KEY LANGUAGE TO USE:
-${findingsDocument.keyPhrases.toUse.map(p => `- "${p.phrase}" (${p.context})`).join('\n')}
+${keyPhrasesToUse.map(p => `- "${p.phrase || ''}" (${p.context || ''})`).join('\n') || 'Not provided'}
 
 LANGUAGE TO AVOID:
-${findingsDocument.keyPhrases.toAvoid.map(p => `- "${p.phrase}" (${p.context})`).join('\n')}
+${keyPhrasesToAvoid.map(p => `- "${p.phrase || ''}" (${p.context || ''})`).join('\n') || 'Not provided'}
 
 AUDIENCE INSIGHTS:
-${findingsDocument.audienceAnalyses.map(a => `
-${a.audienceName}:
-- Disconnects: ${a.disconnects.join('; ')}
-- Barriers: ${a.barriers.join('; ')}
-- Opportunities: ${a.opportunities.join('; ')}`).join('\n')}
+${audienceAnalyses.map(a => `
+${a.audienceName || 'Audience'}:
+- Disconnects: ${(a.disconnects || []).join('; ') || 'None identified'}
+- Barriers: ${(a.barriers || []).join('; ') || 'None identified'}
+- Opportunities: ${(a.opportunities || []).join('; ') || 'None identified'}`).join('\n') || 'Not provided'}
 
 STRATEGIC DIRECTION:
-- What Direction: ${findingsDocument.strategicDirection.whatDirection}
-- Why Direction: ${findingsDocument.strategicDirection.whyDirection}
-- How Direction: ${findingsDocument.strategicDirection.howDirection}
+- What Direction: ${strategicDirection.whatDirection || 'Not specified'}
+- Why Direction: ${strategicDirection.whyDirection || 'Not specified'}
+- How Direction: ${strategicDirection.howDirection || 'Not specified'}
 
 CONCLUSION:
-${findingsDocument.conclusion}
+${findingsDocument.conclusion || 'Not provided'}
 `;
 
     const message = await anthropic.messages.create({
