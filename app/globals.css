@@ -1,0 +1,239 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-antenna-bg text-antenna-text antialiased;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  }
+  
+  ::selection {
+    @apply bg-antenna-accent/50 text-antenna-dark;
+  }
+}
+
+@layer components {
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-antenna-border rounded-lg 
+           text-antenna-text placeholder-antenna-muted
+           focus:outline-none focus:ring-2 focus:ring-antenna-dark/10 focus:border-antenna-dark/30
+           transition-all duration-200;
+  }
+  
+  /* Primary button with yellow sweep animation */
+  .btn-primary {
+    @apply relative px-5 py-2.5 bg-antenna-dark text-white rounded-lg font-medium
+           overflow-hidden transition-all duration-300
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  
+  .btn-primary::before {
+    content: '';
+    @apply absolute inset-0 bg-antenna-accent;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .btn-primary:hover::before {
+    transform: translateX(0);
+  }
+  
+  .btn-primary:hover {
+    @apply text-antenna-dark;
+  }
+  
+  .btn-primary span,
+  .btn-primary svg {
+    @apply relative z-10;
+  }
+  
+  /* Secondary button with yellow sweep */
+  .btn-secondary {
+    @apply relative px-5 py-2.5 bg-white border border-antenna-border text-antenna-text rounded-lg font-medium
+           overflow-hidden transition-all duration-300 shadow-card;
+  }
+  
+  .btn-secondary::before {
+    content: '';
+    @apply absolute inset-0 bg-antenna-accent;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .btn-secondary:hover::before {
+    transform: translateX(0);
+  }
+  
+  .btn-secondary:hover {
+    @apply text-antenna-dark border-antenna-accent;
+  }
+  
+  .btn-secondary span,
+  .btn-secondary svg {
+    @apply relative z-10;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-card;
+  }
+  
+  .section-title {
+    @apply text-2xl font-display font-bold text-antenna-dark;
+  }
+  
+  .label {
+    @apply block text-sm font-medium text-antenna-muted mb-2;
+  }
+  
+  /* Yellow highlight link with sweep animation */
+  .accent-link {
+    @apply relative inline-flex items-center gap-1.5 font-semibold text-antenna-dark;
+  }
+  
+  .accent-link .highlight {
+    @apply relative inline-block overflow-hidden;
+  }
+  
+  .accent-link .highlight::before {
+    content: '';
+    @apply absolute inset-0 bg-antenna-accent;
+    z-index: -1;
+  }
+  
+  .accent-link .highlight::after {
+    content: '';
+    @apply absolute inset-0 bg-antenna-accent;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+  }
+  
+  .accent-link:hover .highlight::after {
+    transform: translateX(0);
+  }
+  
+  /* Icon box */
+  .icon-box {
+    @apply w-12 h-12 rounded-xl bg-antenna-iconBg flex items-center justify-center mb-5;
+  }
+  
+  .icon-box svg {
+    @apply w-6 h-6 text-antenna-dark/60;
+  }
+  
+  /* Tag/badge */
+  .tag {
+    @apply px-3 py-1 bg-antenna-bg text-antenna-muted rounded-full text-sm font-medium;
+  }
+  
+  /* Project card with hover effect */
+  .project-card {
+    @apply relative bg-white rounded-xl p-4 border border-antenna-border
+           overflow-hidden transition-all duration-300 cursor-pointer;
+  }
+  
+  .project-card::before {
+    content: '';
+    @apply absolute inset-0 bg-antenna-accent opacity-0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .project-card:hover::before {
+    @apply opacity-100;
+  }
+  
+  .project-card:hover {
+    @apply border-antenna-accent;
+  }
+  
+  .project-card > * {
+    @apply relative z-10;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-antenna-border/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-antenna-muted/30 rounded-full hover:bg-antenna-muted/50;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+}
+
+/* File upload area */
+.upload-zone {
+  @apply border-2 border-dashed border-antenna-border rounded-xl p-8
+         hover:border-antenna-dark/30 hover:bg-antenna-bg/50
+         transition-all duration-300 cursor-pointer bg-white;
+}
+
+.upload-zone.dragging {
+  @apply border-antenna-dark bg-antenna-accent/10;
+}
+
+/* Progress indicator */
+.progress-step {
+  @apply w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold
+         transition-all duration-300;
+}
+
+.progress-step.completed {
+  @apply bg-antenna-dark text-white;
+}
+
+.progress-step.active {
+  @apply bg-antenna-dark text-white;
+}
+
+.progress-step.pending {
+  @apply bg-white border-2 border-antenna-border text-antenna-muted;
+}
+
+/* Tabs */
+.tab-active {
+  @apply border-b-2 border-antenna-dark text-antenna-dark;
+}
+
+/* Version badge */
+.version-badge {
+  @apply fixed bottom-4 right-6 text-xs text-antenna-muted font-mono;
+}
+
+/* Export dropdown */
+.export-dropdown {
+  @apply absolute right-0 top-full mt-2 bg-white rounded-lg shadow-lg border border-antenna-border
+         py-2 min-w-[180px] z-50;
+}
+
+.export-dropdown button {
+  @apply w-full px-4 py-2 text-left text-sm text-antenna-text hover:bg-antenna-bg
+         flex items-center gap-3 transition-colors;
+}
+
+/* Yellow highlight for any element */
+.yellow-highlight {
+  @apply bg-antenna-accent px-1;
+}
