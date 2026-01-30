@@ -9,6 +9,18 @@ interface QuadrantChartProps {
 }
 
 export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProps) {
+  // Defensive: ensure quadrant data exists
+  if (!quadrant) {
+    return <div className="text-center text-antenna-muted p-8">No positioning data available.</div>;
+  }
+
+  // Safe defaults
+  const xAxis = quadrant.xAxis || { label: '', leftLabel: 'Technical', rightLabel: 'Benefit' };
+  const yAxis = quadrant.yAxis || { label: '', topLabel: 'Visionary', bottomLabel: 'Pragmatic' };
+  const currentPosition = quadrant.currentPosition || { x: 0, y: 0 };
+  const targetPosition = quadrant.targetPosition || { x: 0.5, y: 0.5 };
+  const competitors = quadrant.competitors || [];
+
   // Convert -1 to 1 coordinates to percentage positions
   const toPercent = (val: number) => ((val + 1) / 2) * 100;
 
@@ -44,31 +56,31 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
 
         {/* Axis labels */}
         <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-antenna-dark whitespace-nowrap">
-          {quadrant.yAxis.topLabel}
+          {yAxis.topLabel}
         </div>
         <div className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-xs font-medium text-antenna-dark whitespace-nowrap">
-          {quadrant.yAxis.bottomLabel}
+          {yAxis.bottomLabel}
         </div>
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-medium text-antenna-dark">
-          {quadrant.xAxis.leftLabel}
+          {xAxis.leftLabel}
         </div>
         <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-medium text-antenna-dark">
-          {quadrant.xAxis.rightLabel}
+          {xAxis.rightLabel}
         </div>
 
         {/* Competitors */}
-        {quadrant.competitors.map((competitor, index) => (
+        {competitors.map((competitor, index) => (
           <div
             key={index}
             className="absolute transform -translate-x-1/2 -translate-y-1/2 z-10"
             style={{
-              left: `${toPercent(competitor.x)}%`,
-              top: `${100 - toPercent(competitor.y)}%`
+              left: `${toPercent(competitor.x || 0)}%`,
+              top: `${100 - toPercent(competitor.y || 0)}%`
             }}
           >
             <div className="w-3 h-3 bg-antenna-muted rounded-full border-2 border-white shadow-sm" />
             <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 text-xs text-antenna-muted whitespace-nowrap">
-              {competitor.name}
+              {competitor.name || 'Competitor'}
             </span>
           </div>
         ))}
@@ -77,8 +89,8 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
         <div
           className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
           style={{
-            left: `${toPercent(quadrant.currentPosition.x)}%`,
-            top: `${100 - toPercent(quadrant.currentPosition.y)}%`
+            left: `${toPercent(currentPosition.x)}%`,
+            top: `${100 - toPercent(currentPosition.y)}%`
           }}
         >
           <div className="w-5 h-5 bg-antenna-dark rounded-full border-2 border-white shadow-lg" />
@@ -91,8 +103,8 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
         <div
           className="absolute transform -translate-x-1/2 -translate-y-1/2 z-20"
           style={{
-            left: `${toPercent(quadrant.targetPosition.x)}%`,
-            top: `${100 - toPercent(quadrant.targetPosition.y)}%`
+            left: `${toPercent(targetPosition.x)}%`,
+            top: `${100 - toPercent(targetPosition.y)}%`
           }}
         >
           <div className="w-5 h-5 bg-antenna-accent rounded-full border-2 border-white shadow-lg" />
@@ -122,10 +134,10 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
             </marker>
           </defs>
           <line
-            x1={`${toPercent(quadrant.currentPosition.x)}%`}
-            y1={`${100 - toPercent(quadrant.currentPosition.y)}%`}
-            x2={`${toPercent(quadrant.targetPosition.x)}%`}
-            y2={`${100 - toPercent(quadrant.targetPosition.y)}%`}
+            x1={`${toPercent(currentPosition.x)}%`}
+            y1={`${100 - toPercent(currentPosition.y)}%`}
+            x2={`${toPercent(targetPosition.x)}%`}
+            y2={`${100 - toPercent(targetPosition.y)}%`}
             stroke="#1a1a2e"
             strokeWidth="2"
             strokeDasharray="6"

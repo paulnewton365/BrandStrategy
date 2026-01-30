@@ -126,7 +126,7 @@ Return ONLY valid JSON, no markdown code blocks.`
     // Ensure required fields
     hypothesis.version = hypothesis.version || '1.0.0';
     hypothesis.brandName = brandName;
-    hypothesis.generatedAt = new Date();
+    hypothesis.generatedAt = new Date().toISOString();
 
     // Sanitize em-dashes throughout
     const sanitize = (obj: unknown): unknown => {

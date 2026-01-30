@@ -73,25 +73,38 @@ export function generateId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
-export function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(date);
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return 'N/A';
+  try {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    // Check if date is valid
+    if (isNaN(d.getTime())) {
+      return 'N/A';
+    }
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(d);
+  } catch {
+    return 'N/A';
+  }
 }
 
 export function countWords(text: string): number {
+  if (!text) return 0;
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
 
 export function truncateText(text: string, maxWords: number): string {
+  if (!text) return '';
   const words = text.trim().split(/\s+/);
   if (words.length <= maxWords) return text;
   return words.slice(0, maxWords).join(' ') + '...';
 }
 
-export function sanitizeForPDF(text: string): string {
+export function sanitizeForPDF(text: string | null | undefined): string {
+  if (!text) return '';
   // Remove em-dashes and replace with regular dashes
   return text
     .replace(/\u2014/g, '-')

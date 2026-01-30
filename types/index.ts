@@ -118,7 +118,7 @@ export interface FindingsDocument {
     howDirection: string;
   };
   conclusion: string;
-  generatedAt: Date;
+  generatedAt: Date | string;
 }
 
 export interface BrandValue {
@@ -158,7 +158,7 @@ export interface BrandHypothesis {
   };
   visualGuidance: string;
   toneOfVoiceGuidance: string;
-  generatedAt: Date;
+  generatedAt: Date | string;
 }
 
 export interface ProjectState {

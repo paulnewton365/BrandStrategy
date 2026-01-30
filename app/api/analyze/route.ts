@@ -94,7 +94,7 @@ Return ONLY valid JSON, no markdown code blocks.`
     // Ensure required fields and sanitize
     findings.version = findings.version || '1.0.0';
     findings.brandName = brandName;
-    findings.generatedAt = new Date();
+    findings.generatedAt = new Date().toISOString();
 
     // Sanitize em-dashes throughout
     const sanitize = (obj: unknown): unknown => {
