@@ -56,6 +56,7 @@ export interface Tension {
   description: string;
   pole1: string;
   pole2: string;
+  reconciliation: string;
   quotes: string[];
 }
 
@@ -101,6 +102,7 @@ export interface AudienceAnalysis {
 }
 
 export interface KeyFinding {
+  title: string;
   finding: string;
   supportingQuotes: string[];
   source: 'IDI' | 'questionnaire' | 'both';

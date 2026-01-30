@@ -69,22 +69,37 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
     keyFindings.forEach((finding, index) => {
       children.push(
         new Paragraph({
+          heading: HeadingLevel.HEADING_2,
           children: [
-            new TextRun({ text: `${index + 1}. `, bold: true, size: 24 }),
-            new TextRun({ text: `[${finding?.source || 'Research'}] `, color: '666666', size: 20 }),
-            new TextRun({ text: sanitizeForPDF(finding?.finding || ''), size: 24 })
+            new TextRun({ text: `${index + 1}. ${sanitizeForPDF(finding?.title || 'Finding')}`, bold: true, size: 28 }),
+            new TextRun({ text: ` [${finding?.source || 'Research'}]`, color: '666666', size: 20 })
           ]
         })
       );
 
-      (finding?.supportingQuotes || []).forEach((quote) => {
+      if (finding?.finding) {
         children.push(
           new Paragraph({
-            indent: { left: 720 },
-            children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+            children: [new TextRun({ text: sanitizeForPDF(finding.finding), size: 24 })]
           })
         );
-      });
+      }
+
+      if ((finding?.supportingQuotes || []).length > 0) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'Supporting Evidence:', bold: true, size: 22, color: '666666' })]
+          })
+        );
+        (finding.supportingQuotes || []).forEach((quote) => {
+          children.push(
+            new Paragraph({
+              indent: { left: 720 },
+              children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+            })
+          );
+        });
+      }
 
       children.push(new Paragraph({ children: [] }));
     });
@@ -425,27 +440,61 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
         new Paragraph({
           heading: HeadingLevel.HEADING_2,
           children: [new TextRun({ text: tension?.title || 'Tension', bold: true, size: 28 })]
-        }),
-        new Paragraph({
-          children: [
-            new TextRun({ text: tension?.pole1 || '', bold: true, size: 24 }),
-            new TextRun({ text: ' vs ', size: 24 }),
-            new TextRun({ text: tension?.pole2 || '', bold: true, size: 24 })
-          ]
-        }),
-        new Paragraph({
-          children: [new TextRun({ text: sanitizeForPDF(tension?.description || ''), size: 24 })]
         })
       );
 
-      (tension?.quotes || []).forEach((quote) => {
+      // Only show poles if they have actual values
+      const hasPoles = tension?.pole1 && tension?.pole2 && 
+                       tension.pole1 !== 'Pole 1' && tension.pole2 !== 'Pole 2';
+      if (hasPoles) {
         children.push(
           new Paragraph({
-            indent: { left: 720 },
-            children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+            children: [
+              new TextRun({ text: tension.pole1, bold: true, size: 24 }),
+              new TextRun({ text: ' vs ', size: 24 }),
+              new TextRun({ text: tension.pole2, bold: true, size: 24 })
+            ]
           })
         );
-      });
+      }
+
+      if (tension?.description) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: 'The Challenge: ', bold: true, size: 24 }),
+              new TextRun({ text: sanitizeForPDF(tension.description), size: 24 })
+            ]
+          })
+        );
+      }
+
+      if (tension?.reconciliation) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: 'How to Reconcile: ', bold: true, color: '22c55e', size: 24 }),
+              new TextRun({ text: sanitizeForPDF(tension.reconciliation), size: 24 })
+            ]
+          })
+        );
+      }
+
+      if ((tension?.quotes || []).length > 0) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'Supporting Evidence:', bold: true, size: 22, color: '666666' })]
+          })
+        );
+        (tension.quotes || []).forEach((quote) => {
+          children.push(
+            new Paragraph({
+              indent: { left: 720 },
+              children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+            })
+          );
+        });
+      }
 
       children.push(new Paragraph({ children: [] }));
     });

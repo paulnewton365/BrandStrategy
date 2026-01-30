@@ -14,9 +14,12 @@ INPUT PRIORITY:
 ANALYSIS FRAMEWORK:
 
 1. KEY FINDINGS: Identify 5-8 key findings that emerge from the research. Each finding should:
-   - State the insight clearly
+   - Have a clear, concise title that encapsulates the insight (e.g., "Language Matters for Discovery", "Founder Dependency Risk")
+   - State the insight clearly in the finding field
    - Include 2-3 anonymized supporting quotes from transcripts
    - Indicate whether it came from IDI, questionnaire, or both
+   
+   IMPORTANT: The "title" field must be a descriptive headline, not just "IDI" or a source label.
 
 2. IDI FINDINGS: Summarize the in-depth interview findings:
    - Overall summary of what interviews revealed
@@ -49,10 +52,14 @@ ANALYSIS FRAMEWORK:
    - Include 2-3 anonymized pull quotes that support it
 
 8. TENSIONS: Identify 2-4 key tensions that need to be reconciled. Each tension MUST have:
-   - A clear descriptive title (e.g., "Innovation vs. Tradition", "Scale vs. Intimacy")
-   - Both poles of the tension named
-   - Explanation of why this creates a strategic challenge
-   - Supporting quotes
+   - "title": A clear descriptive title (e.g., "Innovation vs. Tradition", "Scale vs. Intimacy")
+   - "pole1": The ACTUAL first pole name from the title (e.g., "Discoverability", "Pillar Autonomy", "Founder Legacy") - NOT "Pole 1"
+   - "pole2": The ACTUAL second pole name from the title (e.g., "Accuracy", "Organizational Unity", "Institutional Independence") - NOT "Pole 2"
+   - "description": Detailed explanation of why this tension exists and the strategic challenge it creates (2-3 sentences)
+   - "reconciliation": Specific, actionable guidance on how the brand can balance or resolve this tension (2-3 sentences)
+   - "quotes": 2-3 supporting quotes from transcripts that illustrate this tension
+   
+   IMPORTANT: pole1 and pole2 must contain the actual tension pole names, never generic labels like "Pole 1" or "Pole 2".
 
 9. OPPORTUNITIES: Identify 3-5 strategic brand opportunities. Each opportunity should:
    - Have a clear title
@@ -71,12 +78,19 @@ ANALYSIS FRAMEWORK:
    - Identify barriers to engagement
    - Highlight opportunities for connection
 
-12. POSITIONING QUADRANT: Create a positioning analysis with:
-   - X-axis: Technical/Product focus vs. Audience Benefit focus
-   - Y-axis: Pragmatic vs. Visionary
-   - Plot current brand position
-   - Plot recommended future position
-   - Plot competitor positions
+12. POSITIONING QUADRANT: Create a positioning analysis with NUMERIC coordinates between -1 and 1:
+   - xAxis: { label: "Focus", leftLabel: "Technical/Product", rightLabel: "Audience Benefit" }
+   - yAxis: { label: "Approach", topLabel: "Visionary", bottomLabel: "Pragmatic" }
+   - currentPosition: { x: number, y: number } - WHERE THE BRAND IS NOW (must be different from target)
+   - targetPosition: { x: number, y: number } - WHERE THE BRAND SHOULD MOVE TO
+   - competitors: Array of 3-5 competitors with { name: string, x: number, y: number }
+   
+   IMPORTANT: 
+   - Current and target positions MUST be different to show the strategic movement
+   - Include at least 3 competitors from the competitor insights provided
+   - All x,y values must be between -1 and 1
+   - Example: currentPosition: { x: -0.3, y: -0.2 }, targetPosition: { x: 0.5, y: 0.6 }
+   - Example competitors: [{ name: "CompetitorA", x: 0.2, y: 0.4 }, { name: "CompetitorB", x: -0.5, y: 0.1 }]
 
 13. STRATEGIC DIRECTION: Provide preliminary direction for:
    - WHAT statement: What does the brand actually do?

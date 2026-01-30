@@ -181,10 +181,11 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
             <div className="space-y-6">
               {keyFindings.map((finding, index) => (
                 <div key={index} className="border-l-4 border-antenna-accent pl-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="tag">{finding.source || 'Research'}</span>
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-semibold text-antenna-dark">{sanitizeForPDF(finding.title || `Finding ${index + 1}`)}</h3>
+                    <span className="tag text-xs">{finding.source || 'Research'}</span>
                   </div>
-                  <p className="font-medium text-antenna-dark mb-3">{sanitizeForPDF(finding.finding)}</p>
+                  <p className="text-antenna-muted mb-3">{sanitizeForPDF(finding.finding)}</p>
                   {(finding.supportingQuotes || []).length > 0 && (
                     <div className="space-y-2">
                       {(finding.supportingQuotes || []).map((quote, qi) => (
@@ -485,31 +486,55 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
               Brand Tensions
             </h2>
             <div className="space-y-6">
-              {tensions.map((tension, index) => (
-                <div key={index} className="p-6 bg-antenna-bg rounded-xl">
-                  <h3 className="font-semibold text-antenna-dark mb-3">{tension.title || 'Untitled Tension'}</h3>
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="px-3 py-1 bg-white text-antenna-dark rounded-full text-sm font-medium shadow-card">
-                      {tension.pole1 || 'Pole 1'}
-                    </span>
-                    <span className="text-antenna-muted">vs</span>
-                    <span className="px-3 py-1 bg-white text-antenna-dark rounded-full text-sm font-medium shadow-card">
-                      {tension.pole2 || 'Pole 2'}
-                    </span>
+              {tensions.map((tension, index) => {
+                // Only show poles if they have actual values (not "Pole 1" / "Pole 2")
+                const pole1Valid = tension.pole1 && tension.pole1 !== 'Pole 1' && tension.pole1.toLowerCase() !== 'pole 1';
+                const pole2Valid = tension.pole2 && tension.pole2 !== 'Pole 2' && tension.pole2.toLowerCase() !== 'pole 2';
+                const showPoles = pole1Valid && pole2Valid;
+                
+                return (
+                  <div key={index} className="p-6 bg-antenna-bg rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark text-lg mb-3">{tension.title || 'Untitled Tension'}</h3>
+                    {showPoles && (
+                      <div className="flex items-center gap-4 mb-4">
+                        <span className="px-3 py-1 bg-white text-antenna-dark rounded-full text-sm font-medium shadow-card">
+                          {tension.pole1}
+                        </span>
+                        <span className="text-antenna-muted">vs</span>
+                        <span className="px-3 py-1 bg-white text-antenna-dark rounded-full text-sm font-medium shadow-card">
+                          {tension.pole2}
+                        </span>
+                      </div>
+                    )}
+                    {tension.description && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-antenna-dark mb-2">The Challenge</h4>
+                        <p className="text-antenna-muted">{sanitizeForPDF(tension.description)}</p>
+                      </div>
+                    )}
+                    {tension.reconciliation && (
+                      <div className="mb-4 p-4 bg-white rounded-lg border border-antenna-border">
+                        <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center gap-2">
+                          <Lightbulb className="w-4 h-4" />
+                          How to Reconcile
+                        </h4>
+                        <p className="text-antenna-muted">{sanitizeForPDF(tension.reconciliation)}</p>
+                      </div>
+                    )}
+                    {tension.quotes && tension.quotes.length > 0 && (
+                      <div className="space-y-2 pt-4 border-t border-antenna-border/50">
+                        <p className="text-xs font-medium text-antenna-muted uppercase tracking-wide mb-2">Supporting Evidence</p>
+                        {tension.quotes.map((quote, qi) => (
+                          <blockquote key={qi} className="flex items-start gap-3 text-sm italic text-antenna-muted">
+                            <Quote className="w-4 h-4 flex-shrink-0 mt-1" />
+                            <span>"{sanitizeForPDF(quote)}"</span>
+                          </blockquote>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <p className="text-antenna-muted mb-4">{sanitizeForPDF(tension.description || '')}</p>
-                  {tension.quotes && tension.quotes.length > 0 && (
-                    <div className="space-y-2">
-                      {tension.quotes.map((quote, qi) => (
-                        <blockquote key={qi} className="flex items-start gap-3 text-sm italic text-antenna-muted">
-                          <Quote className="w-4 h-4 flex-shrink-0 mt-1" />
-                          <span>"{sanitizeForPDF(quote)}"</span>
-                        </blockquote>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
