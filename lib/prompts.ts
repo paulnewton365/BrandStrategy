@@ -81,13 +81,21 @@ ANALYSIS FRAMEWORK:
    - Highlight opportunities for connection
 
 12. POSITIONING QUADRANT: Create a positioning analysis with NUMERIC coordinates between -1 and 1:
-   - xAxis: { label: "Focus", leftLabel: "Technical/Product", rightLabel: "Audience Benefit" }
-   - yAxis: { label: "Approach", topLabel: "Visionary", bottomLabel: "Pragmatic" }
+   - xAxis: { label: "Approach", leftLabel: "Visionary", rightLabel: "Pragmatic" }
+   - yAxis: { label: "Focus", topLabel: "Audience Benefit", bottomLabel: "Technical/Product" }
    - currentPosition: { x: number, y: number } - WHERE THE BRAND IS NOW (must be different from target)
    - targetPosition: { x: number, y: number } - WHERE THE BRAND SHOULD MOVE TO
    - competitors: Array of 3-5 competitors with { name: string, x: number, y: number }
    - rationale: 2-3 sentences explaining WHY this target position is right for the brand based on findings
    - movementStrategy: 2-3 sentences describing HOW the brand should make this positioning shift
+   
+   COORDINATE SYSTEM:
+   - X-axis: -1 = Visionary (left), +1 = Pragmatic (right)
+   - Y-axis: -1 = Technical/Product (bottom), +1 = Audience Benefit (top)
+   - Top-Left quadrant (Visionary + Benefit): x < 0, y > 0
+   - Top-Right quadrant (Pragmatic + Benefit): x > 0, y > 0
+   - Bottom-Left quadrant (Visionary + Technical): x < 0, y < 0
+   - Bottom-Right quadrant (Pragmatic + Technical): x > 0, y < 0
    
    IMPORTANT: 
    - Current and target positions MUST be different to show the strategic movement

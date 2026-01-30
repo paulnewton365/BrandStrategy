@@ -14,9 +14,9 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
     return <div className="text-center text-antenna-muted p-8">No positioning data available.</div>;
   }
 
-  // Safe defaults
-  const xAxis = quadrant.xAxis || { label: '', leftLabel: 'Technical', rightLabel: 'Benefit' };
-  const yAxis = quadrant.yAxis || { label: '', topLabel: 'Visionary', bottomLabel: 'Pragmatic' };
+  // Safe defaults - X-axis: Visionary to Pragmatic, Y-axis: Technical to Benefit
+  const xAxis = quadrant.xAxis || { label: '', leftLabel: 'Visionary', rightLabel: 'Pragmatic' };
+  const yAxis = quadrant.yAxis || { label: '', topLabel: 'Audience Benefit', bottomLabel: 'Technical/Product' };
   const currentPosition = quadrant.currentPosition || { x: 0, y: 0 };
   const targetPosition = quadrant.targetPosition || { x: 0.5, y: 0.5 };
   const competitors = quadrant.competitors || [];
@@ -40,32 +40,33 @@ export default function QuadrantChart({ quadrant, brandName }: QuadrantChartProp
           <div className="absolute top-3/4 left-0 right-0 h-px bg-antenna-border/50" />
         </div>
 
-        {/* Quadrant labels */}
+        {/* Quadrant labels - corrected orientation */}
         <div className="absolute top-4 left-4 text-xs text-antenna-muted font-medium uppercase tracking-wide">
-          Visionary + Technical
-        </div>
-        <div className="absolute top-4 right-4 text-xs text-antenna-muted font-medium uppercase tracking-wide text-right">
           Visionary + Benefit
         </div>
-        <div className="absolute bottom-4 left-4 text-xs text-antenna-muted font-medium uppercase tracking-wide">
-          Pragmatic + Technical
-        </div>
-        <div className="absolute bottom-4 right-4 text-xs text-antenna-muted font-medium uppercase tracking-wide text-right">
+        <div className="absolute top-4 right-4 text-xs text-antenna-muted font-medium uppercase tracking-wide text-right">
           Pragmatic + Benefit
         </div>
+        <div className="absolute bottom-4 left-4 text-xs text-antenna-muted font-medium uppercase tracking-wide">
+          Visionary + Technical
+        </div>
+        <div className="absolute bottom-4 right-4 text-xs text-antenna-muted font-medium uppercase tracking-wide text-right">
+          Pragmatic + Technical
+        </div>
 
-        {/* Axis labels */}
+        {/* Axis labels - Y-axis: Benefit (top) to Technical (bottom) */}
         <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs font-medium text-antenna-dark whitespace-nowrap">
-          {yAxis.topLabel}
+          Visionary
         </div>
         <div className="absolute right-2 top-1/2 -translate-y-1/2 rotate-90 text-xs font-medium text-antenna-dark whitespace-nowrap">
-          {yAxis.bottomLabel}
+          Pragmatic
         </div>
+        {/* X-axis: Visionary (left) to Pragmatic (right) */}
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs font-medium text-antenna-dark">
-          {xAxis.leftLabel}
+          Technical/Product
         </div>
         <div className="absolute top-2 left-1/2 -translate-x-1/2 text-xs font-medium text-antenna-dark">
-          {xAxis.rightLabel}
+          Audience Benefit
         </div>
 
         {/* Competitors */}

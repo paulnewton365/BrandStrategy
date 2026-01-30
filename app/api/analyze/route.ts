@@ -223,8 +223,8 @@ Return the JSON object starting with { and ending with }`
     
     if (!findings.positioningQuadrant || typeof findings.positioningQuadrant !== 'object') {
       findings.positioningQuadrant = {
-        xAxis: { label: 'Focus', leftLabel: 'Technical/Product', rightLabel: 'Audience Benefit' },
-        yAxis: { label: 'Approach', topLabel: 'Visionary', bottomLabel: 'Pragmatic' },
+        xAxis: { label: 'Approach', leftLabel: 'Visionary', rightLabel: 'Pragmatic' },
+        yAxis: { label: 'Focus', topLabel: 'Audience Benefit', bottomLabel: 'Technical/Product' },
         currentPosition: { x: 0, y: 0 },
         targetPosition: { x: 0.5, y: 0.5 },
         competitors: [],
