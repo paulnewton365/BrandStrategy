@@ -37,7 +37,7 @@ import HypothesisView from '@/components/HypothesisView';
 type Step = 'inputs' | 'findings' | 'hypothesis';
 
 // App version - update with each build
-const APP_VERSION = '1.3.3';
+const APP_VERSION = '1.3.4';
 
 // Antenna Logo Component
 function AntennaLogo() {
