@@ -89,7 +89,7 @@ ${findingsDocument.conclusion || 'Not provided'}
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 6000,
+      max_tokens: 8000,
       messages: [
         {
           role: 'user',

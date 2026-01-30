@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 8000,
+      max_tokens: 12000,
       messages: [
         {
           role: 'user',
@@ -51,14 +51,17 @@ Here is the research data to analyze:
 
 ${context}
 
-Please analyze this data and return a JSON object matching the FindingsDocument structure. Remember:
-- Do NOT use em-dashes or en-dashes anywhere
-- Prioritize IDI transcripts over questionnaire data
-- Anonymize all quotes
-- Create a positioning quadrant with X-axis (Technical/Product vs Audience Benefit) and Y-axis (Pragmatic vs Visionary)
-- Provide strategic direction for What, Why, and How statements
+Please analyze this data and return a JSON object matching the FindingsDocument structure. 
 
-Return ONLY valid JSON, no markdown code blocks.`
+CRITICAL INSTRUCTIONS:
+- Return ONLY valid JSON - no markdown, no code blocks, no explanatory text
+- Do NOT use em-dashes (—) or en-dashes (–) anywhere - use regular hyphens (-) only
+- Prioritize IDI transcripts over questionnaire data
+- Anonymize all quotes (remove names, use "they" instead of "I")
+- All array fields must be arrays, even if empty: []
+- All string fields must be strings, even if empty: ""
+
+Return the JSON object starting with { and ending with }`
         }
       ]
     });
@@ -74,6 +77,8 @@ Return ONLY valid JSON, no markdown code blocks.`
     try {
       // Clean the response - remove any markdown code blocks if present
       let jsonStr = textContent.text.trim();
+      
+      // Remove markdown code blocks
       if (jsonStr.startsWith('```json')) {
         jsonStr = jsonStr.slice(7);
       }
@@ -84,17 +89,115 @@ Return ONLY valid JSON, no markdown code blocks.`
         jsonStr = jsonStr.slice(0, -3);
       }
       jsonStr = jsonStr.trim();
+      
+      // Try to find JSON object if there's extra text
+      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
 
       findings = JSON.parse(jsonStr);
     } catch (parseError) {
-      console.error('Failed to parse AI response:', textContent.text.substring(0, 500));
-      throw new Error('Failed to parse analysis response');
+      console.error('Failed to parse AI response. First 1000 chars:', textContent.text.substring(0, 1000));
+      console.error('Last 500 chars:', textContent.text.substring(textContent.text.length - 500));
+      console.error('Parse error:', parseError);
+      throw new Error('Failed to parse analysis response. The AI may have returned invalid JSON.');
     }
+
+    // Helper to extract string from potential object
+    const ensureString = (value: unknown): string => {
+      if (typeof value === 'string') return value;
+      if (value === null || value === undefined) return '';
+      if (typeof value === 'object') {
+        const obj = value as Record<string, unknown>;
+        if (typeof obj.text === 'string') return obj.text;
+        if (typeof obj.content === 'string') return obj.content;
+        if (typeof obj.statement === 'string') return obj.statement;
+        if (typeof obj.description === 'string') return obj.description;
+        if (typeof obj.value === 'string') return obj.value;
+        for (const v of Object.values(obj)) {
+          if (typeof v === 'string' && v.length > 0) return v;
+        }
+        return '';
+      }
+      return String(value);
+    };
+
+    // Helper to ensure array
+    const ensureArray = <T>(value: unknown): T[] => {
+      if (Array.isArray(value)) return value;
+      return [];
+    };
 
     // Ensure required fields and sanitize
     findings.version = findings.version || '1.0.0';
     findings.brandName = brandName;
     findings.generatedAt = new Date().toISOString();
+    
+    // Ensure string fields
+    findings.executiveSummary = ensureString(findings.executiveSummary);
+    findings.conclusion = ensureString(findings.conclusion);
+    
+    // Ensure array fields
+    findings.keyFindings = ensureArray(findings.keyFindings);
+    findings.themes = ensureArray(findings.themes);
+    findings.tensions = ensureArray(findings.tensions);
+    findings.opportunities = ensureArray(findings.opportunities);
+    findings.audienceAnalyses = ensureArray(findings.audienceAnalyses);
+    findings.audienceInsightFindings = ensureArray(findings.audienceInsightFindings);
+    findings.competitorInsightFindings = ensureArray(findings.competitorInsightFindings);
+    findings.strategicRecommendations = ensureArray(findings.strategicRecommendations);
+    
+    // Ensure nested objects
+    if (!findings.idiFindings || typeof findings.idiFindings !== 'object') {
+      findings.idiFindings = { summary: '', keyInsights: [], quotes: [] };
+    }
+    findings.idiFindings.summary = ensureString(findings.idiFindings.summary);
+    findings.idiFindings.keyInsights = ensureArray(findings.idiFindings.keyInsights);
+    findings.idiFindings.quotes = ensureArray(findings.idiFindings.quotes);
+    
+    if (!findings.questionnaireFindings || typeof findings.questionnaireFindings !== 'object') {
+      findings.questionnaireFindings = { summary: '', keyInsights: [], responseHighlights: [] };
+    }
+    findings.questionnaireFindings.summary = ensureString(findings.questionnaireFindings.summary);
+    findings.questionnaireFindings.keyInsights = ensureArray(findings.questionnaireFindings.keyInsights);
+    findings.questionnaireFindings.responseHighlights = ensureArray(findings.questionnaireFindings.responseHighlights);
+    
+    if (!findings.contentAnalysis || typeof findings.contentAnalysis !== 'object') {
+      findings.contentAnalysis = { wordsToUse: [], wordsToAvoid: [], phrasesToUse: [], phrasesToAvoid: [] };
+    }
+    findings.contentAnalysis.wordsToUse = ensureArray(findings.contentAnalysis.wordsToUse);
+    findings.contentAnalysis.wordsToAvoid = ensureArray(findings.contentAnalysis.wordsToAvoid);
+    findings.contentAnalysis.phrasesToUse = ensureArray(findings.contentAnalysis.phrasesToUse);
+    findings.contentAnalysis.phrasesToAvoid = ensureArray(findings.contentAnalysis.phrasesToAvoid);
+    
+    if (!findings.keyPhrases || typeof findings.keyPhrases !== 'object') {
+      findings.keyPhrases = { toUse: [], toAvoid: [] };
+    }
+    findings.keyPhrases.toUse = ensureArray(findings.keyPhrases.toUse);
+    findings.keyPhrases.toAvoid = ensureArray(findings.keyPhrases.toAvoid);
+    
+    if (!findings.strategicDirection || typeof findings.strategicDirection !== 'object') {
+      findings.strategicDirection = { whatDirection: '', whyDirection: '', howDirection: '' };
+    }
+    findings.strategicDirection.whatDirection = ensureString(findings.strategicDirection.whatDirection);
+    findings.strategicDirection.whyDirection = ensureString(findings.strategicDirection.whyDirection);
+    findings.strategicDirection.howDirection = ensureString(findings.strategicDirection.howDirection);
+    
+    if (!findings.positioningQuadrant || typeof findings.positioningQuadrant !== 'object') {
+      findings.positioningQuadrant = {
+        xAxis: { label: 'Focus', leftLabel: 'Technical/Product', rightLabel: 'Audience Benefit' },
+        yAxis: { label: 'Approach', topLabel: 'Visionary', bottomLabel: 'Pragmatic' },
+        currentPosition: { x: 0, y: 0 },
+        targetPosition: { x: 0.5, y: 0.5 },
+        competitors: [],
+        rationale: '',
+        movementStrategy: ''
+      };
+    }
+    findings.positioningQuadrant.rationale = ensureString(findings.positioningQuadrant.rationale);
+    findings.positioningQuadrant.movementStrategy = ensureString(findings.positioningQuadrant.movementStrategy);
+    findings.positioningQuadrant.competitors = ensureArray(findings.positioningQuadrant.competitors);
 
     // Sanitize em-dashes throughout
     const sanitize = (obj: unknown): unknown => {
