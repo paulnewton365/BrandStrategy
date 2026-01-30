@@ -97,6 +97,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
   const keyPhrasesToAvoid = findings.keyPhrases?.toAvoid || [];
   const audienceAnalyses = findings.audienceAnalyses || [];
   const strategicDirection = findings.strategicDirection || {};
+  const strategicRecommendations = Array.isArray(findings.strategicRecommendations) ? findings.strategicRecommendations : [];
 
   // Helper function to safely convert to array
   const toArray = <T,>(value: unknown): T[] => {
@@ -661,6 +662,24 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
               Positioning Opportunity
             </h2>
             <QuadrantChart quadrant={findings.positioningQuadrant} brandName={brandName} />
+            
+            {/* Positioning Rationale */}
+            {(findings.positioningQuadrant.rationale || findings.positioningQuadrant.movementStrategy) && (
+              <div className="mt-6 space-y-4">
+                {findings.positioningQuadrant.rationale && (
+                  <div className="p-5 bg-antenna-accent/20 border-l-4 border-antenna-accent rounded-r-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-2">Why This Position?</h3>
+                    <p className="text-antenna-muted">{sanitizeForPDF(findings.positioningQuadrant.rationale)}</p>
+                  </div>
+                )}
+                {findings.positioningQuadrant.movementStrategy && (
+                  <div className="p-5 bg-antenna-bg rounded-xl">
+                    <h3 className="font-semibold text-antenna-dark mb-2">How to Get There</h3>
+                    <p className="text-antenna-muted">{sanitizeForPDF(findings.positioningQuadrant.movementStrategy)}</p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -693,15 +712,43 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
           </div>
         )}
 
-        {/* Conclusion */}
-        {findings.conclusion && (
+        {/* Strategic Recommendations */}
+        {strategicRecommendations.length > 0 && (
           <div className="card p-8">
-            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-4">
-              Conclusion
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Lightbulb strokeWidth={1.5} />
+              </div>
+              Strategic Recommendations
             </h2>
-            <p className="text-antenna-text leading-relaxed">
+            <p className="text-antenna-muted mb-6">Based on our findings, we recommend the following strategic directions for brand development:</p>
+            <div className="space-y-4">
+              {strategicRecommendations.map((rec, index) => (
+                <div key={index} className="flex items-start gap-4 p-4 bg-antenna-bg rounded-xl">
+                  <div className="w-8 h-8 rounded-full bg-antenna-accent flex items-center justify-center flex-shrink-0">
+                    <span className="font-semibold text-antenna-dark text-sm">{index + 1}</span>
+                  </div>
+                  <p className="text-antenna-muted pt-1">{sanitizeForPDF(rec)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Conclusion & Next Steps */}
+        {findings.conclusion && (
+          <div className="card p-8 bg-antenna-dark text-white">
+            <h2 className="text-xl font-display font-semibold mb-4">
+              Conclusion & Next Steps
+            </h2>
+            <p className="text-white/90 leading-relaxed mb-6">
               {sanitizeForPDF(findings.conclusion)}
             </p>
+            <div className="pt-4 border-t border-white/20">
+              <p className="text-white/70 text-sm">
+                These findings provide the foundation for developing a comprehensive brand hypothesis that will guide messaging, visual identity, and strategic positioning.
+              </p>
+            </div>
           </div>
         )}
       </div>

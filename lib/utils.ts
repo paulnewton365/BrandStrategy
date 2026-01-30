@@ -105,12 +105,42 @@ export function truncateText(text: string, maxWords: number): string {
 
 export function sanitizeForPDF(text: unknown): string {
   if (text === null || text === undefined) return '';
-  if (typeof text !== 'string') {
-    // Convert to string if it's a number, object, etc.
-    text = String(text);
+  
+  // If it's an object, try to extract meaningful text
+  if (typeof text === 'object') {
+    // If it's an array, join the elements
+    if (Array.isArray(text)) {
+      return text.map(item => sanitizeForPDF(item)).join(', ');
+    }
+    // If it has common text properties, use those
+    const obj = text as Record<string, unknown>;
+    if (typeof obj.text === 'string') return sanitizeForPDF(obj.text);
+    if (typeof obj.content === 'string') return sanitizeForPDF(obj.content);
+    if (typeof obj.value === 'string') return sanitizeForPDF(obj.value);
+    if (typeof obj.description === 'string') return sanitizeForPDF(obj.description);
+    if (typeof obj.statement === 'string') return sanitizeForPDF(obj.statement);
+    if (typeof obj.name === 'string') return sanitizeForPDF(obj.name);
+    // Try to get the first string value
+    for (const value of Object.values(obj)) {
+      if (typeof value === 'string' && value.length > 0) {
+        return sanitizeForPDF(value);
+      }
+    }
+    // Last resort: return empty string instead of [object Object]
+    return '';
   }
+  
+  // Convert numbers to string
+  if (typeof text === 'number') {
+    return String(text);
+  }
+  
+  if (typeof text !== 'string') {
+    return '';
+  }
+  
   // Remove em-dashes and replace with regular dashes
-  return (text as string)
+  return text
     .replace(/\u2014/g, '-')
     .replace(/\u2013/g, '-')
     .replace(/—/g, '-')

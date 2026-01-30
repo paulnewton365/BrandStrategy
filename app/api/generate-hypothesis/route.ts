@@ -142,6 +142,65 @@ Return ONLY valid JSON, no markdown code blocks.`
       throw new Error('Failed to parse hypothesis response');
     }
 
+    // Helper to extract string from potential object
+    const ensureString = (value: unknown): string => {
+      if (typeof value === 'string') return value;
+      if (value === null || value === undefined) return '';
+      if (typeof value === 'object') {
+        const obj = value as Record<string, unknown>;
+        // Try common text properties
+        if (typeof obj.text === 'string') return obj.text;
+        if (typeof obj.content === 'string') return obj.content;
+        if (typeof obj.statement === 'string') return obj.statement;
+        if (typeof obj.description === 'string') return obj.description;
+        if (typeof obj.value === 'string') return obj.value;
+        // Return first string value found
+        for (const v of Object.values(obj)) {
+          if (typeof v === 'string' && v.length > 0) return v;
+        }
+        return '';
+      }
+      return String(value);
+    };
+
+    // Ensure required fields are strings
+    hypothesis.whatStatement = ensureString(hypothesis.whatStatement);
+    hypothesis.whyStatement = ensureString(hypothesis.whyStatement);
+    hypothesis.howStatement = ensureString(hypothesis.howStatement);
+    hypothesis.positioningStatement = ensureString(hypothesis.positioningStatement);
+    hypothesis.visualGuidance = ensureString(hypothesis.visualGuidance);
+    hypothesis.toneOfVoiceGuidance = ensureString(hypothesis.toneOfVoiceGuidance);
+    
+    // Ensure organizingIdea is properly structured
+    if (!hypothesis.organizingIdea || typeof hypothesis.organizingIdea !== 'object') {
+      hypothesis.organizingIdea = { statement: '', breakdown: [] };
+    }
+    hypothesis.organizingIdea.statement = ensureString(hypothesis.organizingIdea.statement);
+    if (!Array.isArray(hypothesis.organizingIdea.breakdown)) {
+      hypothesis.organizingIdea.breakdown = [];
+    }
+
+    // Ensure brandHouse is properly structured
+    if (!hypothesis.brandHouse || typeof hypothesis.brandHouse !== 'object') {
+      hypothesis.brandHouse = { essence: '', promise: '', mission: '', vision: '', purpose: '', values: [], personality: [] };
+    }
+    hypothesis.brandHouse.essence = ensureString(hypothesis.brandHouse.essence);
+    hypothesis.brandHouse.promise = ensureString(hypothesis.brandHouse.promise);
+    hypothesis.brandHouse.mission = ensureString(hypothesis.brandHouse.mission);
+    hypothesis.brandHouse.vision = ensureString(hypothesis.brandHouse.vision);
+    hypothesis.brandHouse.purpose = ensureString(hypothesis.brandHouse.purpose);
+    if (!Array.isArray(hypothesis.brandHouse.values)) {
+      hypothesis.brandHouse.values = [];
+    }
+    if (!Array.isArray(hypothesis.brandHouse.personality)) {
+      hypothesis.brandHouse.personality = [];
+    }
+
+    // Ensure whyThisWorks is an array
+    if (!Array.isArray(hypothesis.whyThisWorks)) {
+      hypothesis.whyThisWorks = [];
+    }
+
     // Ensure required fields
     hypothesis.version = hypothesis.version || '1.0.0';
     hypothesis.brandName = brandName;

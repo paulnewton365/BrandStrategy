@@ -92,6 +92,8 @@ export interface PositioningQuadrant {
     x: number;
     y: number;
   }>;
+  rationale: string;
+  movementStrategy: string;
 }
 
 export interface AudienceAnalysis {
@@ -177,6 +179,7 @@ export interface FindingsDocument {
     whyDirection: string;
     howDirection: string;
   };
+  strategicRecommendations: string[];
   conclusion: string;
   generatedAt: Date | string;
 }

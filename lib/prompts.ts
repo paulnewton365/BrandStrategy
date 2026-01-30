@@ -84,11 +84,14 @@ ANALYSIS FRAMEWORK:
    - currentPosition: { x: number, y: number } - WHERE THE BRAND IS NOW (must be different from target)
    - targetPosition: { x: number, y: number } - WHERE THE BRAND SHOULD MOVE TO
    - competitors: Array of 3-5 competitors with { name: string, x: number, y: number }
+   - rationale: 2-3 sentences explaining WHY this target position is right for the brand based on findings
+   - movementStrategy: 2-3 sentences describing HOW the brand should make this positioning shift
    
    IMPORTANT: 
    - Current and target positions MUST be different to show the strategic movement
    - Include at least 3 competitors from the competitor insights provided
    - All x,y values must be between -1 and 1
+   - The rationale should connect research findings to the recommended position
    - Example: currentPosition: { x: -0.3, y: -0.2 }, targetPosition: { x: 0.5, y: 0.6 }
    - Example competitors: [{ name: "CompetitorA", x: 0.2, y: 0.4 }, { name: "CompetitorB", x: -0.5, y: 0.1 }]
 
@@ -97,7 +100,15 @@ ANALYSIS FRAMEWORK:
    - WHY statement: Why does the brand exist beyond profit?
    - HOW statement: How does the brand approach its work?
 
-14. CONCLUSION: Summarize key insights and provide clear direction for brand hypothesis development.
+14. STRATEGIC RECOMMENDATIONS: Provide 4-6 specific, actionable recommendations for brand strategy based on the findings. Each recommendation should:
+   - Be clear and specific
+   - Connect directly to insights from the research
+   - Provide direction for the brand hypothesis development
+
+15. CONCLUSION: Summarize key insights and provide clear direction for brand hypothesis development. The conclusion should:
+   - Synthesize the most important findings
+   - Highlight the primary opportunity for the brand
+   - Set up the strategic foundation for the brand hypothesis
 
 OUTPUT FORMAT:
 Return a valid JSON object matching the FindingsDocument type structure. Ensure all quotes are anonymized and all text avoids em-dashes.`;

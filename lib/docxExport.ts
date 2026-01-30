@@ -28,6 +28,8 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
   const opportunities = findings?.opportunities || [];
   const audienceAnalyses = findings?.audienceAnalyses || [];
   const strategicDirection = findings?.strategicDirection || { whatDirection: '', whyDirection: '', howDirection: '' };
+  const strategicRecommendations = Array.isArray(findings?.strategicRecommendations) ? findings.strategicRecommendations : [];
+  const positioningQuadrant = findings?.positioningQuadrant || null;
   const conclusion = findings?.conclusion || '';
 
   // Title
@@ -593,16 +595,84 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
     }
   }
 
-  // Conclusion
-  if (conclusion) {
+  // Positioning Rationale
+  if (positioningQuadrant && (positioningQuadrant.rationale || positioningQuadrant.movementStrategy)) {
     children.push(
-      new Paragraph({ children: [] }),
+      new Paragraph({ children: [new PageBreak()] }),
       new Paragraph({
         heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: 'Conclusion', bold: true, size: 32 })]
+        children: [new TextRun({ text: 'Positioning Opportunity', bold: true, size: 32 })]
+      })
+    );
+
+    if (positioningQuadrant.rationale) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Why This Position?', bold: true, size: 28 })]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: sanitizeForPDF(positioningQuadrant.rationale), size: 24 })]
+        }),
+        new Paragraph({ children: [] })
+      );
+    }
+
+    if (positioningQuadrant.movementStrategy) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'How to Get There', bold: true, size: 28 })]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: sanitizeForPDF(positioningQuadrant.movementStrategy), size: 24 })]
+        })
+      );
+    }
+  }
+
+  // Strategic Recommendations
+  if (strategicRecommendations.length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Strategic Recommendations', bold: true, size: 32 })]
+      }),
+      new Paragraph({
+        children: [new TextRun({ text: 'Based on our findings, we recommend the following strategic directions for brand development:', size: 24, color: '666666' })]
+      }),
+      new Paragraph({ children: [] })
+    );
+
+    strategicRecommendations.forEach((rec, index) => {
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `${index + 1}. `, bold: true, size: 24 }),
+            new TextRun({ text: sanitizeForPDF(rec), size: 24 })
+          ]
+        }),
+        new Paragraph({ children: [] })
+      );
+    });
+  }
+
+  // Conclusion & Next Steps
+  if (conclusion) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Conclusion & Next Steps', bold: true, size: 32 })]
       }),
       new Paragraph({
         children: [new TextRun({ text: sanitizeForPDF(conclusion), size: 24 })]
+      }),
+      new Paragraph({ children: [] }),
+      new Paragraph({
+        shading: { fill: 'E8E6E1', type: ShadingType.CLEAR },
+        children: [new TextRun({ text: 'These findings provide the foundation for developing a comprehensive brand hypothesis that will guide messaging, visual identity, and strategic positioning.', size: 22, italics: true, color: '666666' })]
       })
     );
   }
