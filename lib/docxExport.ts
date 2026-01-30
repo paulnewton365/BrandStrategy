@@ -17,11 +17,15 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
   const brandName = findings?.brandName || 'Brand';
   const version = findings?.version || '1.0.0';
   const executiveSummary = findings?.executiveSummary || '';
+  const keyFindings = findings?.keyFindings || [];
+  const idiFindings = findings?.idiFindings || { summary: '', keyInsights: [], quotes: [] };
+  const questionnaireFindings = findings?.questionnaireFindings || { summary: '', keyInsights: [], responseHighlights: [] };
+  const audienceInsightFindings = findings?.audienceInsightFindings || [];
+  const competitorInsightFindings = findings?.competitorInsightFindings || [];
+  const contentAnalysis = findings?.contentAnalysis || { wordsToUse: [], wordsToAvoid: [], phrasesToUse: [], phrasesToAvoid: [] };
   const themes = findings?.themes || [];
   const tensions = findings?.tensions || [];
   const opportunities = findings?.opportunities || [];
-  const keyPhrasesToUse = findings?.keyPhrases?.toUse || [];
-  const keyPhrasesToAvoid = findings?.keyPhrases?.toAvoid || [];
   const audienceAnalyses = findings?.audienceAnalyses || [];
   const strategicDirection = findings?.strategicDirection || { whatDirection: '', whyDirection: '', howDirection: '' };
   const conclusion = findings?.conclusion || '';
@@ -52,9 +56,330 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
     );
   }
 
+  // Key Findings
+  if (keyFindings.length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Key Findings', bold: true, size: 32 })]
+      })
+    );
+
+    keyFindings.forEach((finding, index) => {
+      children.push(
+        new Paragraph({
+          children: [
+            new TextRun({ text: `${index + 1}. `, bold: true, size: 24 }),
+            new TextRun({ text: `[${finding?.source || 'Research'}] `, color: '666666', size: 20 }),
+            new TextRun({ text: sanitizeForPDF(finding?.finding || ''), size: 24 })
+          ]
+        })
+      );
+
+      (finding?.supportingQuotes || []).forEach((quote) => {
+        children.push(
+          new Paragraph({
+            indent: { left: 720 },
+            children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+          })
+        );
+      });
+
+      children.push(new Paragraph({ children: [] }));
+    });
+  }
+
+  // IDI Findings
+  if (idiFindings.summary || (idiFindings.keyInsights || []).length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'In-Depth Interview Findings', bold: true, size: 32 })]
+      })
+    );
+
+    if (idiFindings.summary) {
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: sanitizeForPDF(idiFindings.summary), size: 24 })]
+        }),
+        new Paragraph({ children: [] })
+      );
+    }
+
+    if ((idiFindings.keyInsights || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Key Insights', bold: true, size: 28 })]
+        })
+      );
+
+      (idiFindings.keyInsights || []).forEach((insight) => {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${sanitizeForPDF(insight)}`, size: 24 })]
+          })
+        );
+      });
+      children.push(new Paragraph({ children: [] }));
+    }
+
+    if ((idiFindings.quotes || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Notable Quotes', bold: true, size: 28 })]
+        })
+      );
+
+      (idiFindings.quotes || []).forEach((quote) => {
+        children.push(
+          new Paragraph({
+            indent: { left: 720 },
+            children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+          })
+        );
+      });
+    }
+  }
+
+  // Questionnaire Findings
+  if (questionnaireFindings.summary || (questionnaireFindings.keyInsights || []).length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Questionnaire Findings', bold: true, size: 32 })]
+      })
+    );
+
+    if (questionnaireFindings.summary) {
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: sanitizeForPDF(questionnaireFindings.summary), size: 24 })]
+        }),
+        new Paragraph({ children: [] })
+      );
+    }
+
+    if ((questionnaireFindings.keyInsights || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Key Insights', bold: true, size: 28 })]
+        })
+      );
+
+      (questionnaireFindings.keyInsights || []).forEach((insight) => {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${sanitizeForPDF(insight)}`, size: 24 })]
+          })
+        );
+      });
+    }
+  }
+
+  // Audience Insight Findings
+  if (audienceInsightFindings.length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Audience Insights', bold: true, size: 32 })]
+      })
+    );
+
+    audienceInsightFindings.forEach((audience) => {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: audience?.audienceName || 'Audience', bold: true, size: 28 })]
+        })
+      );
+
+      if (audience?.summary) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: sanitizeForPDF(audience.summary), size: 24 })]
+          })
+        );
+      }
+
+      (audience?.keyInsights || []).forEach((insight) => {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: `• ${sanitizeForPDF(insight)}`, size: 24 })]
+          })
+        );
+      });
+
+      children.push(new Paragraph({ children: [] }));
+    });
+  }
+
+  // Competitor Insight Findings
+  if (competitorInsightFindings.length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Competitor Insights', bold: true, size: 32 })]
+      })
+    );
+
+    competitorInsightFindings.forEach((competitor) => {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: competitor?.competitorName || 'Competitor', bold: true, size: 28 })]
+        })
+      );
+
+      if (competitor?.positioning) {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: 'Positioning: ', bold: true, size: 24 }),
+              new TextRun({ text: sanitizeForPDF(competitor.positioning), size: 24 })
+            ]
+          })
+        );
+      }
+
+      if ((competitor?.keyDifferentiators || []).length > 0) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'Key Differentiators:', bold: true, size: 24 })]
+          })
+        );
+        (competitor.keyDifferentiators || []).forEach((diff) => {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: `• ${sanitizeForPDF(diff)}`, size: 24, color: '22c55e' })]
+            })
+          );
+        });
+      }
+
+      if ((competitor?.weaknesses || []).length > 0) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'Weaknesses:', bold: true, size: 24 })]
+          })
+        );
+        (competitor.weaknesses || []).forEach((weak) => {
+          children.push(
+            new Paragraph({
+              children: [new TextRun({ text: `• ${sanitizeForPDF(weak)}`, size: 24, color: 'ef4444' })]
+            })
+          );
+        });
+      }
+
+      children.push(new Paragraph({ children: [] }));
+    });
+  }
+
+  // Content Analysis
+  if ((contentAnalysis.wordsToUse || []).length > 0 || (contentAnalysis.wordsToAvoid || []).length > 0 ||
+      (contentAnalysis.phrasesToUse || []).length > 0 || (contentAnalysis.phrasesToAvoid || []).length > 0) {
+    children.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        heading: HeadingLevel.HEADING_1,
+        children: [new TextRun({ text: 'Content Analysis', bold: true, size: 32 })]
+      })
+    );
+
+    if ((contentAnalysis.wordsToUse || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Words to Use', bold: true, color: '22c55e', size: 28 })]
+        })
+      );
+      (contentAnalysis.wordsToUse || []).forEach((item) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `"${item?.word || ''}"`, bold: true, size: 24 }),
+              new TextRun({ text: item?.frequency ? ` (${item.frequency}x)` : '', size: 22, color: '666666' }),
+              new TextRun({ text: item?.context ? ` - ${sanitizeForPDF(item.context)}` : '', size: 22, color: '666666' })
+            ]
+          })
+        );
+      });
+      children.push(new Paragraph({ children: [] }));
+    }
+
+    if ((contentAnalysis.wordsToAvoid || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Words to Avoid', bold: true, color: 'ef4444', size: 28 })]
+        })
+      );
+      (contentAnalysis.wordsToAvoid || []).forEach((item) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `"${item?.word || ''}"`, bold: true, size: 24 }),
+              new TextRun({ text: item?.reason ? ` - ${sanitizeForPDF(item.reason)}` : '', size: 22, color: '666666' })
+            ]
+          })
+        );
+      });
+      children.push(new Paragraph({ children: [] }));
+    }
+
+    if ((contentAnalysis.phrasesToUse || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Phrases to Use', bold: true, color: '22c55e', size: 28 })]
+        })
+      );
+      (contentAnalysis.phrasesToUse || []).forEach((item) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `"${item?.phrase || ''}"`, bold: true, size: 24 }),
+              new TextRun({ text: item?.context ? ` - ${sanitizeForPDF(item.context)}` : '', size: 22, color: '666666' })
+            ]
+          })
+        );
+      });
+      children.push(new Paragraph({ children: [] }));
+    }
+
+    if ((contentAnalysis.phrasesToAvoid || []).length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Phrases to Avoid', bold: true, color: 'ef4444', size: 28 })]
+        })
+      );
+      (contentAnalysis.phrasesToAvoid || []).forEach((item) => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `"${item?.phrase || ''}"`, bold: true, size: 24 }),
+              new TextRun({ text: item?.reason ? ` - ${sanitizeForPDF(item.reason)}` : '', size: 22, color: '666666' })
+            ]
+          })
+        );
+      });
+    }
+  }
+
   // Key Themes
   if (themes.length > 0) {
     children.push(
+      new Paragraph({ children: [new PageBreak()] }),
       new Paragraph({
         heading: HeadingLevel.HEADING_1,
         children: [new TextRun({ text: 'Key Themes', bold: true, size: 32 })]
@@ -110,15 +435,26 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
         }),
         new Paragraph({
           children: [new TextRun({ text: sanitizeForPDF(tension?.description || ''), size: 24 })]
-        }),
-        new Paragraph({ children: [] })
+        })
       );
+
+      (tension?.quotes || []).forEach((quote) => {
+        children.push(
+          new Paragraph({
+            indent: { left: 720 },
+            children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+          })
+        );
+      });
+
+      children.push(new Paragraph({ children: [] }));
     });
   }
 
-  // Opportunities
+  // Strategic Opportunities
   if (opportunities.length > 0) {
     children.push(
+      new Paragraph({ children: [new PageBreak()] }),
       new Paragraph({
         heading: HeadingLevel.HEADING_1,
         children: [new TextRun({ text: 'Strategic Opportunities', bold: true, size: 32 })]
@@ -139,62 +475,27 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
             new TextRun({ text: 'Rationale: ', bold: true, size: 24 }),
             new TextRun({ text: sanitizeForPDF(opp?.rationale || ''), size: 24 })
           ]
-        }),
-        new Paragraph({ children: [] })
+        })
       );
+
+      if ((opp?.supportingQuotes || []).length > 0) {
+        children.push(
+          new Paragraph({
+            children: [new TextRun({ text: 'Supporting Evidence:', bold: true, size: 22, color: '666666' })]
+          })
+        );
+        (opp.supportingQuotes || []).forEach((quote) => {
+          children.push(
+            new Paragraph({
+              indent: { left: 720 },
+              children: [new TextRun({ text: `"${sanitizeForPDF(quote)}"`, italics: true, size: 22, color: '666666' })]
+            })
+          );
+        });
+      }
+
+      children.push(new Paragraph({ children: [] }));
     });
-  }
-
-  // Key Language
-  if (keyPhrasesToUse.length > 0 || keyPhrasesToAvoid.length > 0) {
-    children.push(
-      new Paragraph({ children: [new PageBreak()] }),
-      new Paragraph({
-        heading: HeadingLevel.HEADING_1,
-        children: [new TextRun({ text: 'Key Language & Phraseology', bold: true, size: 32 })]
-      })
-    );
-
-    if (keyPhrasesToUse.length > 0) {
-      children.push(
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [new TextRun({ text: 'Words to Use', bold: true, color: '22c55e', size: 28 })]
-        })
-      );
-
-      keyPhrasesToUse.forEach(phrase => {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: `"${phrase?.phrase || ''}"`, bold: true, size: 24 }),
-              new TextRun({ text: ` - ${sanitizeForPDF(phrase?.context || '')}`, size: 22, color: '666666' })
-            ]
-          })
-        );
-      });
-    }
-
-    if (keyPhrasesToAvoid.length > 0) {
-      children.push(
-        new Paragraph({ children: [] }),
-        new Paragraph({
-          heading: HeadingLevel.HEADING_2,
-          children: [new TextRun({ text: 'Words to Avoid', bold: true, color: 'ef4444', size: 28 })]
-        })
-      );
-
-      keyPhrasesToAvoid.forEach(phrase => {
-        children.push(
-          new Paragraph({
-            children: [
-              new TextRun({ text: `"${phrase?.phrase || ''}"`, bold: true, size: 24 }),
-              new TextRun({ text: ` - ${sanitizeForPDF(phrase?.context || '')}`, size: 22, color: '666666' })
-            ]
-          })
-        );
-      });
-    }
   }
 
   // Strategic Direction

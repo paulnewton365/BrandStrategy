@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { Download, Quote, TrendingUp, AlertTriangle, Lightbulb, Users, Target, FileText, ChevronDown, FileType, File } from 'lucide-react';
+import { Download, Quote, TrendingUp, AlertTriangle, Lightbulb, Users, Target, FileText, ChevronDown, FileType, File, MessageSquare, BarChart3, Eye, Crosshair } from 'lucide-react';
 import { FindingsDocument } from '@/types';
 import QuadrantChart from './QuadrantChart';
 import { formatDate, sanitizeForPDF } from '@/lib/utils';
@@ -84,6 +84,12 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
   };
 
   // Safe accessors with defaults
+  const keyFindings = findings.keyFindings || [];
+  const idiFindings = findings.idiFindings || { summary: '', keyInsights: [], quotes: [] };
+  const questionnaireFindings = findings.questionnaireFindings || { summary: '', keyInsights: [], responseHighlights: [] };
+  const audienceInsightFindings = findings.audienceInsightFindings || [];
+  const competitorInsightFindings = findings.competitorInsightFindings || [];
+  const contentAnalysis = findings.contentAnalysis || { wordsToUse: [], wordsToAvoid: [], phrasesToUse: [], phrasesToAvoid: [] };
   const themes = findings.themes || [];
   const tensions = findings.tensions || [];
   const opportunities = findings.opportunities || [];
@@ -143,7 +149,7 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
             </div>
             <div className="text-right text-sm text-antenna-muted">
               <p className="tag mb-2">v{findings.version || '1.0.0'}</p>
-              <p>{findings.generatedAt ? formatDate(new Date(findings.generatedAt)) : 'N/A'}</p>
+              <p>{findings.generatedAt ? formatDate(findings.generatedAt) : 'N/A'}</p>
             </div>
           </div>
         </div>
@@ -160,6 +166,282 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
             <p className="text-antenna-text leading-relaxed">
               {sanitizeForPDF(findings.executiveSummary)}
             </p>
+          </div>
+        )}
+
+        {/* Key Findings */}
+        {keyFindings.length > 0 && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Lightbulb strokeWidth={1.5} />
+              </div>
+              Key Findings
+            </h2>
+            <div className="space-y-6">
+              {keyFindings.map((finding, index) => (
+                <div key={index} className="border-l-4 border-antenna-accent pl-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="tag">{finding.source || 'Research'}</span>
+                  </div>
+                  <p className="font-medium text-antenna-dark mb-3">{sanitizeForPDF(finding.finding)}</p>
+                  {(finding.supportingQuotes || []).length > 0 && (
+                    <div className="space-y-2">
+                      {(finding.supportingQuotes || []).map((quote, qi) => (
+                        <blockquote key={qi} className="flex items-start gap-3 text-sm italic text-antenna-muted bg-antenna-bg p-3 rounded-lg">
+                          <Quote className="w-4 h-4 flex-shrink-0 mt-1 text-antenna-muted" />
+                          <span>"{sanitizeForPDF(quote)}"</span>
+                        </blockquote>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* IDI Findings */}
+        {(idiFindings.summary || (idiFindings.keyInsights || []).length > 0) && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <MessageSquare strokeWidth={1.5} />
+              </div>
+              In-Depth Interview Findings
+            </h2>
+            {idiFindings.summary && (
+              <p className="text-antenna-text mb-6">{sanitizeForPDF(idiFindings.summary)}</p>
+            )}
+            {(idiFindings.keyInsights || []).length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-semibold text-antenna-dark mb-3">Key Insights</h3>
+                <ul className="space-y-2">
+                  {(idiFindings.keyInsights || []).map((insight, i) => (
+                    <li key={i} className="flex items-start gap-2 text-antenna-muted">
+                      <span className="w-1.5 h-1.5 rounded-full bg-antenna-accent mt-2 flex-shrink-0" />
+                      {sanitizeForPDF(insight)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(idiFindings.quotes || []).length > 0 && (
+              <div>
+                <h3 className="font-semibold text-antenna-dark mb-3">Notable Quotes</h3>
+                <div className="space-y-2">
+                  {(idiFindings.quotes || []).map((quote, i) => (
+                    <blockquote key={i} className="flex items-start gap-3 text-sm italic text-antenna-muted bg-antenna-bg p-3 rounded-lg">
+                      <Quote className="w-4 h-4 flex-shrink-0 mt-1" />
+                      <span>"{sanitizeForPDF(quote)}"</span>
+                    </blockquote>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Questionnaire Findings */}
+        {(questionnaireFindings.summary || (questionnaireFindings.keyInsights || []).length > 0) && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <BarChart3 strokeWidth={1.5} />
+              </div>
+              Questionnaire Findings
+            </h2>
+            {questionnaireFindings.summary && (
+              <p className="text-antenna-text mb-6">{sanitizeForPDF(questionnaireFindings.summary)}</p>
+            )}
+            {(questionnaireFindings.keyInsights || []).length > 0 && (
+              <div className="mb-6">
+                <h3 className="font-semibold text-antenna-dark mb-3">Key Insights</h3>
+                <ul className="space-y-2">
+                  {(questionnaireFindings.keyInsights || []).map((insight, i) => (
+                    <li key={i} className="flex items-start gap-2 text-antenna-muted">
+                      <span className="w-1.5 h-1.5 rounded-full bg-antenna-accent mt-2 flex-shrink-0" />
+                      {sanitizeForPDF(insight)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {(questionnaireFindings.responseHighlights || []).length > 0 && (
+              <div>
+                <h3 className="font-semibold text-antenna-dark mb-3">Response Highlights</h3>
+                <ul className="space-y-2">
+                  {(questionnaireFindings.responseHighlights || []).map((highlight, i) => (
+                    <li key={i} className="text-sm text-antenna-muted bg-antenna-bg p-3 rounded-lg">
+                      {sanitizeForPDF(highlight)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Audience Insight Findings */}
+        {audienceInsightFindings.length > 0 && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Users strokeWidth={1.5} />
+              </div>
+              Audience Insights
+            </h2>
+            <div className="space-y-6">
+              {audienceInsightFindings.map((audience, index) => (
+                <div key={index} className="p-5 border border-antenna-border rounded-xl">
+                  <h3 className="font-semibold text-antenna-dark mb-3">{audience.audienceName || 'Audience'}</h3>
+                  {audience.summary && (
+                    <p className="text-antenna-muted mb-4">{sanitizeForPDF(audience.summary)}</p>
+                  )}
+                  {(audience.keyInsights || []).length > 0 && (
+                    <ul className="space-y-2">
+                      {(audience.keyInsights || []).map((insight, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-antenna-muted">
+                          <span className="w-1.5 h-1.5 rounded-full bg-antenna-accent mt-1.5 flex-shrink-0" />
+                          {sanitizeForPDF(insight)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Competitor Insight Findings */}
+        {competitorInsightFindings.length > 0 && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Crosshair strokeWidth={1.5} />
+              </div>
+              Competitor Insights
+            </h2>
+            <div className="space-y-6">
+              {competitorInsightFindings.map((competitor, index) => (
+                <div key={index} className="p-5 border border-antenna-border rounded-xl">
+                  <h3 className="font-semibold text-antenna-dark mb-3">{competitor.competitorName || 'Competitor'}</h3>
+                  {competitor.positioning && (
+                    <p className="text-antenna-muted mb-4">
+                      <span className="font-medium text-antenna-dark">Positioning: </span>
+                      {sanitizeForPDF(competitor.positioning)}
+                    </p>
+                  )}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {(competitor.keyDifferentiators || []).length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium text-green-600 mb-2">Key Differentiators</h4>
+                        <ul className="space-y-1">
+                          {(competitor.keyDifferentiators || []).map((diff, i) => (
+                            <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(diff)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {(competitor.weaknesses || []).length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-medium text-red-600 mb-2">Weaknesses</h4>
+                        <ul className="space-y-1">
+                          {(competitor.weaknesses || []).map((weak, i) => (
+                            <li key={i} className="text-sm text-antenna-muted">• {sanitizeForPDF(weak)}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Content Analysis */}
+        {(contentAnalysis.wordsToUse?.length > 0 || contentAnalysis.wordsToAvoid?.length > 0 || 
+          contentAnalysis.phrasesToUse?.length > 0 || contentAnalysis.phrasesToAvoid?.length > 0) && (
+          <div className="card p-8">
+            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
+              <div className="icon-box !mb-0">
+                <Eye strokeWidth={1.5} />
+              </div>
+              Content Analysis
+            </h2>
+            <div className="grid md:grid-cols-2 gap-8">
+              {/* Words to Use */}
+              {(contentAnalysis.wordsToUse || []).length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-green-700 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    Words to Use
+                  </h3>
+                  <div className="space-y-2">
+                    {(contentAnalysis.wordsToUse || []).map((item, i) => (
+                      <div key={i} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="font-medium text-green-800">"{item.word || ''}"</p>
+                        {item.frequency && <p className="text-xs text-green-600">Used {item.frequency}x</p>}
+                        {item.context && <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(item.context)}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Words to Avoid */}
+              {(contentAnalysis.wordsToAvoid || []).length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-red-700 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    Words to Avoid
+                  </h3>
+                  <div className="space-y-2">
+                    {(contentAnalysis.wordsToAvoid || []).map((item, i) => (
+                      <div key={i} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="font-medium text-red-800">"{item.word || ''}"</p>
+                        {item.reason && <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(item.reason)}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Phrases to Use */}
+              {(contentAnalysis.phrasesToUse || []).length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-green-700 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                    Phrases to Use
+                  </h3>
+                  <div className="space-y-2">
+                    {(contentAnalysis.phrasesToUse || []).map((item, i) => (
+                      <div key={i} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                        <p className="font-medium text-green-800">"{item.phrase || ''}"</p>
+                        {item.context && <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(item.context)}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Phrases to Avoid */}
+              {(contentAnalysis.phrasesToAvoid || []).length > 0 && (
+                <div>
+                  <h3 className="font-semibold text-red-700 mb-4 flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-red-500" />
+                    Phrases to Avoid
+                  </h3>
+                  <div className="space-y-2">
+                    {(contentAnalysis.phrasesToAvoid || []).map((item, i) => (
+                      <div key={i} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="font-medium text-red-800">"{item.phrase || ''}"</p>
+                        {item.reason && <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(item.reason)}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -232,80 +514,38 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
           </div>
         )}
 
-        {/* Opportunities */}
+        {/* Strategic Opportunities */}
         {opportunities.length > 0 && (
           <div className="card p-8">
             <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6 flex items-center gap-3">
               <div className="icon-box !mb-0">
-                <Lightbulb strokeWidth={1.5} />
+                <Target strokeWidth={1.5} />
               </div>
               Strategic Opportunities
             </h2>
-            <div className="grid gap-4">
+            <div className="space-y-6">
               {opportunities.map((opportunity, index) => (
                 <div key={index} className="p-5 border border-antenna-border rounded-xl hover:shadow-card-hover transition-shadow">
                   <h3 className="font-semibold text-antenna-dark mb-2">{opportunity.title || 'Untitled Opportunity'}</h3>
                   <p className="text-antenna-muted mb-3">{sanitizeForPDF(opportunity.description || '')}</p>
                   {opportunity.rationale && (
-                    <p className="text-sm text-antenna-muted">
+                    <p className="text-sm text-antenna-muted mb-4">
                       <span className="font-medium text-antenna-dark">Rationale:</span> {sanitizeForPDF(opportunity.rationale)}
                     </p>
                   )}
+                  {(opportunity.supportingQuotes || []).length > 0 && (
+                    <div className="space-y-2 mt-4 pt-4 border-t border-antenna-border">
+                      <p className="text-xs font-medium text-antenna-muted uppercase tracking-wide">Supporting Evidence</p>
+                      {(opportunity.supportingQuotes || []).map((quote, qi) => (
+                        <blockquote key={qi} className="flex items-start gap-3 text-sm italic text-antenna-muted bg-antenna-bg p-3 rounded-lg">
+                          <Quote className="w-4 h-4 flex-shrink-0 mt-1" />
+                          <span>"{sanitizeForPDF(quote)}"</span>
+                        </blockquote>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ))}
-            </div>
-          </div>
-        )}
-
-        {/* Key Language */}
-        {(keyPhrasesToUse.length > 0 || keyPhrasesToAvoid.length > 0) && (
-          <div className="card p-8">
-            <h2 className="text-xl font-display font-semibold text-antenna-dark mb-6">
-              Key Language & Phraseology
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              {keyPhrasesToUse.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-green-700 mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-500" />
-                    Words to Use
-                  </h3>
-                  <div className="space-y-3">
-                    {keyPhrasesToUse.map((phrase, index) => (
-                      <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="font-medium text-green-800">"{phrase.phrase || ''}"</p>
-                        <p className="text-sm text-green-600 mt-1">
-                          Used {phrase.frequency || 0}x in {phrase.source || 'unknown'}s
-                        </p>
-                        {phrase.context && (
-                          <p className="text-sm text-green-700/70 mt-1">{sanitizeForPDF(phrase.context)}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {keyPhrasesToAvoid.length > 0 && (
-                <div>
-                  <h3 className="font-semibold text-red-700 mb-4 flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-red-500" />
-                    Words to Avoid
-                  </h3>
-                  <div className="space-y-3">
-                    {keyPhrasesToAvoid.map((phrase, index) => (
-                      <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                        <p className="font-medium text-red-800">"{phrase.phrase || ''}"</p>
-                        <p className="text-sm text-red-600 mt-1">
-                          Identified as problematic in {phrase.source || 'unknown'}s
-                        </p>
-                        {phrase.context && (
-                          <p className="text-sm text-red-700/70 mt-1">{sanitizeForPDF(phrase.context)}</p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}

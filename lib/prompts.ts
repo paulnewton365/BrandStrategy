@@ -13,45 +13,77 @@ INPUT PRIORITY:
 
 ANALYSIS FRAMEWORK:
 
-1. THEMES: Identify 3-5 major themes that emerge consistently across interviews. Each theme should:
+1. KEY FINDINGS: Identify 5-8 key findings that emerge from the research. Each finding should:
+   - State the insight clearly
+   - Include 2-3 anonymized supporting quotes from transcripts
+   - Indicate whether it came from IDI, questionnaire, or both
+
+2. IDI FINDINGS: Summarize the in-depth interview findings:
+   - Overall summary of what interviews revealed
+   - 3-5 key insights from stakeholder conversations
+   - 3-5 powerful anonymized quotes that capture the essence
+
+3. QUESTIONNAIRE FINDINGS: Summarize questionnaire data:
+   - Overall summary of questionnaire responses
+   - 3-5 key insights from the quantitative/qualitative data
+   - Notable response highlights or patterns
+
+4. AUDIENCE INSIGHT FINDINGS: For each audience provided:
+   - Summary of how this audience relates to the brand
+   - 2-3 key insights about reaching/engaging this audience
+
+5. COMPETITOR INSIGHT FINDINGS: For each competitor provided:
+   - Their positioning in the market
+   - Key differentiators
+   - Weaknesses or gaps to exploit
+
+6. CONTENT ANALYSIS: Analyze language patterns:
+   - Words to Use: Specific words stakeholders use positively (with frequency and context)
+   - Words to Avoid: Words that have negative connotations or should be avoided (with reason)
+   - Phrases to Use: Effective phrases from the research (with context)
+   - Phrases to Avoid: Phrases that don't resonate or should be avoided (with reason)
+
+7. THEMES: Identify 3-5 major themes that emerge consistently across interviews. Each theme should:
    - Have a clear title
    - Include a description of what the theme represents
    - Include 2-3 anonymized pull quotes that support it
 
-2. TENSIONS: Identify 2-4 key tensions that need to be reconciled. Each tension should:
-   - Name both poles of the tension
-   - Explain why this creates a strategic challenge
-   - Include supporting quotes
+8. TENSIONS: Identify 2-4 key tensions that need to be reconciled. Each tension MUST have:
+   - A clear descriptive title (e.g., "Innovation vs. Tradition", "Scale vs. Intimacy")
+   - Both poles of the tension named
+   - Explanation of why this creates a strategic challenge
+   - Supporting quotes
 
-3. OPPORTUNITIES: Identify 3-5 strategic brand opportunities based on:
-   - Unmet needs revealed in research
-   - Competitive white space
-   - Audience alignment potential
+9. OPPORTUNITIES: Identify 3-5 strategic brand opportunities. Each opportunity should:
+   - Have a clear title
+   - Description of the opportunity
+   - Rationale for why it matters
+   - 2-3 supporting quotes from transcripts that justify this opportunity
 
-4. KEY LANGUAGE: Extract specific words and phrases that:
+10. KEY LANGUAGE: Extract specific words and phrases that:
    - Stakeholders consistently use to describe the brand
    - Should be incorporated into brand messaging (Words to Use)
    - Should be avoided (Words to Avoid)
    - Note the frequency and context of each
 
-5. AUDIENCE ANALYSIS: For each identified audience:
+11. AUDIENCE ANALYSIS: For each identified audience:
    - List disconnects between current brand and audience needs
    - Identify barriers to engagement
    - Highlight opportunities for connection
 
-6. POSITIONING QUADRANT: Create a positioning analysis with:
+12. POSITIONING QUADRANT: Create a positioning analysis with:
    - X-axis: Technical/Product focus vs. Audience Benefit focus
    - Y-axis: Pragmatic vs. Visionary
    - Plot current brand position
    - Plot recommended future position
    - Plot competitor positions
 
-7. STRATEGIC DIRECTION: Provide preliminary direction for:
+13. STRATEGIC DIRECTION: Provide preliminary direction for:
    - WHAT statement: What does the brand actually do?
    - WHY statement: Why does the brand exist beyond profit?
    - HOW statement: How does the brand approach its work?
 
-8. CONCLUSION: Summarize key insights and provide clear direction for brand hypothesis development.
+14. CONCLUSION: Summarize key insights and provide clear direction for brand hypothesis development.
 
 OUTPUT FORMAT:
 Return a valid JSON object matching the FindingsDocument type structure. Ensure all quotes are anonymized and all text avoids em-dashes.`;

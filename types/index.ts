@@ -63,6 +63,7 @@ export interface Opportunity {
   title: string;
   description: string;
   rationale: string;
+  supportingQuotes: string[];
 }
 
 export interface KeyPhrase {
@@ -99,10 +100,67 @@ export interface AudienceAnalysis {
   opportunities: string[];
 }
 
+export interface KeyFinding {
+  finding: string;
+  supportingQuotes: string[];
+  source: 'IDI' | 'questionnaire' | 'both';
+}
+
+export interface IDIFindings {
+  summary: string;
+  keyInsights: string[];
+  quotes: string[];
+}
+
+export interface QuestionnaireFindings {
+  summary: string;
+  keyInsights: string[];
+  responseHighlights: string[];
+}
+
+export interface AudienceInsightFindings {
+  audienceName: string;
+  summary: string;
+  keyInsights: string[];
+}
+
+export interface CompetitorInsightFindings {
+  competitorName: string;
+  positioning: string;
+  keyDifferentiators: string[];
+  weaknesses: string[];
+}
+
+export interface ContentAnalysis {
+  wordsToUse: Array<{
+    word: string;
+    frequency: number;
+    context: string;
+  }>;
+  wordsToAvoid: Array<{
+    word: string;
+    reason: string;
+  }>;
+  phrasesToUse: Array<{
+    phrase: string;
+    context: string;
+  }>;
+  phrasesToAvoid: Array<{
+    phrase: string;
+    reason: string;
+  }>;
+}
+
 export interface FindingsDocument {
   version: string;
   brandName: string;
   executiveSummary: string;
+  keyFindings: KeyFinding[];
+  idiFindings: IDIFindings;
+  questionnaireFindings: QuestionnaireFindings;
+  audienceInsightFindings: AudienceInsightFindings[];
+  competitorInsightFindings: CompetitorInsightFindings[];
+  contentAnalysis: ContentAnalysis;
   themes: Theme[];
   tensions: Tension[];
   opportunities: Opportunity[];
