@@ -132,41 +132,50 @@ CRITICAL FORMATTING RULES:
 - All statements use "we" voice (first person plural) except the positioning statement which uses the brand name
 
 WORD COUNT LIMITS (STRICT):
-- What Statement: Maximum 140 words
-- Why Statement: Maximum 140 words
-- How Statement: Maximum 140 words
+- What Statement: Maximum 175 words
+- Why Statement: Maximum 175 words
+- How Statement: Maximum 175 words
 - Positioning Statement: Maximum 150 words
 
 BRAND HOUSE LIMITS:
 - Values: Maximum 6 values
 - Personality Traits: Maximum 6 traits
 
-TOTAL DOCUMENT: Maximum 1350 words
+TOTAL DOCUMENT: Maximum 1500 words
 
 AUTHENTICITY REQUIREMENTS:
-- Use words, phrases, and expressions directly from the research
-- Match the tone and vocabulary of stakeholder interviews
-- Avoid generic corporate language
-- Make every word count - be specific, not vague
+- Actively weave in exact words, phrases, and expressions from the IDI transcripts and questionnaire responses
+- Cross-reference the Content Analysis "Words to Use" and "Phrases to Use" lists and embed them naturally throughout all statements
+- NEVER use any words or phrases from the "Words to Avoid" or "Phrases to Avoid" lists - these are explicitly flagged as language the brand should not use
+- Match the tone, vocabulary, and cadence of how stakeholders actually speak
+- Avoid generic corporate language, marketing cliches, and hollow buzzwords
+- Make every word count - be specific, vivid, and concrete rather than vague or abstract
+- The statements should feel like they were written by someone who truly listened to every interview
 
 STATEMENT GUIDANCE:
 
 WHAT STATEMENT (What the brand does):
 - Synthesize what the brand does so it is understandable, authentic, and inspiring
 - Be specific about capabilities and offerings
+- Use language and terminology drawn directly from stakeholder interviews and questionnaires
 - Avoid jargon unless it appears in stakeholder language
+- Should make the reader feel proud of what the organization does
 - Use "we" voice
 
 WHY STATEMENT (Why the brand does it):
-- Articulate the purpose beyond profit
+- Articulate the purpose beyond profit in a way that moves people
 - Connect to meaningful human or societal needs
 - Explain relevance to target audiences
+- Draw on the passion and conviction expressed by stakeholders in their own words
+- Should inspire belief and emotional connection
 - Use "we" voice
 
 HOW STATEMENT (How the brand thinks, works, acts):
-- Express culture and intellectual approach
-- Describe problem-solving methodology
-- Show how approach serves the what and why
+- Express culture and intellectual approach in an energizing way
+- Describe problem-solving methodology and working philosophy
+- Show how the approach serves the what and why
+- Use the descriptive language stakeholders used when talking about how they work
+- Should make the reader want to be part of this organization
 - Use "we" voice
 
 ORGANIZING IDEA:

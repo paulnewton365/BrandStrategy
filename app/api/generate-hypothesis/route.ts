@@ -59,16 +59,22 @@ ${tensions.map((t, i) => `${i + 1}. ${t.title || 'Tension'} (${t.pole1 || ''} vs
 STRATEGIC OPPORTUNITIES:
 ${opportunities.map((o, i) => `${i + 1}. ${o.title || 'Opportunity'}: ${o.description || ''} - Rationale: ${o.rationale || ''}`).join('\n') || 'Not provided'}
 
-CONTENT ANALYSIS - WORDS TO USE:
+CONTENT ANALYSIS - WORDS TO USE (embed these in your statements):
 ${Array.isArray(contentAnalysis.wordsToUse) ? contentAnalysis.wordsToUse.map(w => `- "${w.word || ''}" (${w.context || ''})`).join('\n') : 'Not provided'}
 
-CONTENT ANALYSIS - WORDS TO AVOID:
+CONTENT ANALYSIS - WORDS TO AVOID (NEVER use these):
 ${Array.isArray(contentAnalysis.wordsToAvoid) ? contentAnalysis.wordsToAvoid.map(w => `- "${w.word || ''}" (${w.reason || ''})`).join('\n') : 'Not provided'}
 
-KEY LANGUAGE TO USE:
+CONTENT ANALYSIS - PHRASES TO USE (embed these in your statements):
+${Array.isArray(contentAnalysis.phrasesToUse) ? contentAnalysis.phrasesToUse.map(p => `- "${p.phrase || ''}" (${p.context || ''})`).join('\n') : 'Not provided'}
+
+CONTENT ANALYSIS - PHRASES TO AVOID (NEVER use these):
+${Array.isArray(contentAnalysis.phrasesToAvoid) ? contentAnalysis.phrasesToAvoid.map(p => `- "${p.phrase || ''}" (${p.reason || ''})`).join('\n') : 'Not provided'}
+
+KEY LANGUAGE TO USE (embed these in your statements):
 ${keyPhrasesToUse.map(p => `- "${p.phrase || ''}" (${p.context || ''})`).join('\n') || 'Not provided'}
 
-LANGUAGE TO AVOID:
+LANGUAGE TO AVOID (NEVER use these):
 ${keyPhrasesToAvoid.map(p => `- "${p.phrase || ''}" (${p.context || ''})`).join('\n') || 'Not provided'}
 
 AUDIENCE INSIGHTS:
@@ -101,9 +107,9 @@ ${findingsContext}
 
 Please create a brand strategy hypothesis and return a JSON object with this EXACT structure:
 {
-  "whatStatement": "string - what the brand does (max 140 words, 'we' voice)",
-  "whyStatement": "string - why the brand does it (max 140 words, 'we' voice)",
-  "howStatement": "string - how the brand thinks/works/acts (max 140 words, 'we' voice)",
+  "whatStatement": "string - what the brand does (max 175 words, 'we' voice, inspiring, uses language from research)",
+  "whyStatement": "string - why the brand does it (max 175 words, 'we' voice, inspiring, uses language from research)",
+  "howStatement": "string - how the brand thinks/works/acts (max 175 words, 'we' voice, inspiring, uses language from research)",
   "organizingIdea": {
     "statement": "string - 3-6 word pithy organizing idea",
     "breakdown": [{ "word": "string", "meaning": "string", "mappedTo": "what|why|how" }]
@@ -129,7 +135,10 @@ CRITICAL RULES:
 - All string fields must be actual string values, not nested objects
 - Values array must have 3-6 items with name and description
 - Personality array must have 3-6 items with name and description
-- Use authentic language from the research findings
+- What, Why, How statements: up to 175 words each, use "we" voice, must be INSPIRING
+- ACTIVELY USE the exact words, phrases, and expressions from the Content Analysis "Words to Use" and "Phrases to Use"
+- NEVER use any language from the "Words to Avoid" or "Phrases to Avoid" lists
+- Statements should sound like they were written by someone who truly listened to every stakeholder
 
 Return the JSON object starting with { and ending with }`
         }
