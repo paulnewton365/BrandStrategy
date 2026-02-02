@@ -97,13 +97,34 @@ ANALYSIS FRAMEWORK:
    - Bottom-Left quadrant (Visionary + Technical): x < 0, y < 0
    - Bottom-Right quadrant (Pragmatic + Technical): x > 0, y < 0
    
+   SCORING RUBRIC FOR COORDINATES - Use this consistent methodology:
+   
+   X-axis (Visionary vs Pragmatic) scoring:
+   - Score -0.8 to -0.5: Highly visionary, future-focused, aspirational, innovative, disruptive
+   - Score -0.5 to -0.2: Somewhat visionary, forward-thinking but with practical elements
+   - Score -0.2 to 0.2: Balanced mix of visionary and pragmatic
+   - Score 0.2 to 0.5: Somewhat pragmatic, practical, established, proven methods
+   - Score 0.5 to 0.8: Highly pragmatic, utility-focused, traditional, operational
+   
+   Y-axis (Technical vs Audience Benefit) scoring:
+   - Score -0.8 to -0.5: Highly technical/product-focused, industry-specific, specialist
+   - Score -0.5 to -0.2: Somewhat technical, product-led but with some audience consideration
+   - Score -0.2 to 0.2: Balanced between technical depth and audience benefit
+   - Score 0.2 to 0.5: Somewhat audience-benefit focused, user-centric with technical grounding
+   - Score 0.5 to 0.8: Highly audience-benefit focused, transformative, human-centered, accessible
+   
+   APPLY THIS RUBRIC by analyzing each competitor's:
+   - Positioning statement: Does it emphasize vision/innovation OR practical utility?
+   - Strengths: Are they technical capabilities OR audience/user benefits?
+   - Weaknesses: Do gaps suggest too much vision OR too much pragmatism? Too technical OR too benefit-focused?
+   - Visual style and tone: Does it feel innovative/forward OR established/traditional?
+   
    IMPORTANT: 
    - Current and target positions MUST be different to show the strategic movement
-   - Include at least 3 competitors from the competitor insights provided
-   - All x,y values must be between -1 and 1
+   - Include ALL competitors from the competitor insights provided (use exact names)
+   - All x,y values must be between -0.8 and 0.8 (avoid extremes)
    - The rationale should connect research findings to the recommended position
-   - Example: currentPosition: { x: -0.3, y: -0.2 }, targetPosition: { x: 0.5, y: 0.6 }
-   - Example competitors: [{ name: "CompetitorA", x: 0.2, y: 0.4 }, { name: "CompetitorB", x: -0.5, y: 0.1 }]
+   - Apply the scoring rubric consistently so the same data produces the same coordinates
 
 13. STRATEGIC DIRECTION: Provide preliminary direction for:
    - WHAT statement: What does the brand actually do?
@@ -230,6 +251,8 @@ export function buildAnalysisContext(inputs: {
     positioning: string;
     strengths: string;
     weaknesses: string;
+    visualStyle?: string;
+    toneOfVoice?: string;
   }>;
   assessorComments: Array<{ comment: string; source: string }>;
 }): string {
@@ -262,7 +285,9 @@ export function buildAnalysisContext(inputs: {
     context += `--- ${competitor.competitorName} ---\n`;
     context += `Positioning: ${competitor.positioning}\n`;
     context += `Strengths: ${competitor.strengths}\n`;
-    context += `Weaknesses: ${competitor.weaknesses}\n\n`;
+    context += `Weaknesses: ${competitor.weaknesses}\n`;
+    context += `Visual Style: ${competitor.visualStyle || 'Not provided'}\n`;
+    context += `Tone of Voice: ${competitor.toneOfVoice || 'Not provided'}\n\n`;
   });
 
   context += `=== ASSESSOR COMMENTS ===\n\n`;
