@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import { Download, Quote, TrendingUp, AlertTriangle, Lightbulb, Users, Target, FileText, ChevronDown, FileType, File, MessageSquare, BarChart3, Eye, Crosshair } from 'lucide-react';
 import { FindingsDocument } from '@/types';
 import QuadrantChart from './QuadrantChart';
+import ResearchVisualizationsView from './ResearchVisualizationsView';
 import { formatDate, sanitizeForPDF } from '@/lib/utils';
 import { generateFindingsDocx } from '@/lib/docxExport';
 
@@ -207,6 +208,14 @@ export default function FindingsView({ findings, brandName }: FindingsViewProps)
               {sanitizeForPDF(findings.executiveSummary)}
             </p>
           </div>
+        )}
+
+        {/* Research Visualizations */}
+        {findings.researchVisualization && (
+          <ResearchVisualizationsView
+            visualization={findings.researchVisualization}
+            brandName={brandName}
+          />
         )}
 
         {/* Key Findings */}

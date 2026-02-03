@@ -141,6 +141,40 @@ ANALYSIS FRAMEWORK:
    - Highlight the primary opportunity for the brand
    - Set up the strategic foundation for the brand hypothesis
 
+16. RESEARCH VISUALIZATION: Generate data for research visualizations. Return a "researchVisualization" object with:
+
+   a) researchOverview: Count what was analyzed:
+      - interviewCount: Number of IDI transcripts provided
+      - surveyResponseCount: Number of questionnaire responses provided
+      - wordsAnalyzed: Approximate total word count across all sources (e.g. "36.4K", "12.1K")
+      - conceptsTracked: Number of distinct concepts/themes you identified in analysis
+      - themesFound: Number of major themes (should match themes array length)
+
+   b) brandDescriptors: Extract 15-22 descriptive words that characterize the brand from BOTH interviews and questionnaires. Each entry: { word: string, count: number }.
+      - Count how many distinct sources (interviews + survey responses) used or implied each word
+      - Sort by count descending
+      - Include words like personality traits, values, and attributes stakeholders associate with the brand
+      - Draw from direct language used by stakeholders (e.g. "trusted", "innovative", "educational")
+
+   c) thematicRadar: Analyze thematic emphasis per interviewee across 5-7 dimensions:
+      - dimensions: Array of objects where each has a "subject" field (theme name) and a key for each speaker with their emphasis score (0-30 scale based on mention frequency and emphasis)
+      - speakers: Array of { key: string (2-letter initials), name: string (full name), role: string (their role/title if known) }
+      - Use 2-letter uppercase initials as speaker keys (e.g. "ST", "ZC")
+      - Choose 5-7 thematic dimensions that reveal meaningful differences between speakers
+      - Score based on how frequently and emphatically each speaker discussed each theme
+      - ONLY include if there are 2+ interview transcripts available
+
+   d) convergencePoints: Identify 4-6 points where interviews and surveys AGREE. Each: { label: string, percentage: number (60-100) }
+      - percentage represents the approximate % of all sources that align on this point
+      - Focus on the strongest areas of agreement across all research inputs
+      - ONLY include if BOTH interviews and questionnaire data are available
+
+   e) divergencePoints: Identify 4-6 points where stakeholders DISAGREE or have tension. Each: { label: string, tensionScore: number (40-80) }
+      - tensionScore represents degree of disagreement (higher = more divergent)
+      - Frame as questions that reveal the tension (e.g. "How much to emphasize X vs Y?")
+      - These should connect to the tensions identified earlier in the analysis
+      - ONLY include if there are 2+ distinct sources showing disagreement
+
 OUTPUT FORMAT:
 Return a valid JSON object matching the FindingsDocument type structure. Ensure all quotes are anonymized and all text avoids em-dashes.`;
 

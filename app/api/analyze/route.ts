@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
 
     const message = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
-      max_tokens: 12000,
+      max_tokens: 16000,
       temperature: 0,
       messages: [
         {
@@ -236,6 +236,92 @@ Return the JSON object starting with { and ending with }`
     findings.positioningQuadrant.rationale = ensureString(findings.positioningQuadrant.rationale);
     findings.positioningQuadrant.movementStrategy = ensureString(findings.positioningQuadrant.movementStrategy);
     findings.positioningQuadrant.competitors = ensureArray(findings.positioningQuadrant.competitors);
+
+    // Normalize researchVisualization
+    if (findings.researchVisualization && typeof findings.researchVisualization === 'object') {
+      const viz = findings.researchVisualization as Record<string, unknown>;
+      
+      // Normalize researchOverview
+      if (viz.researchOverview && typeof viz.researchOverview === 'object') {
+        const ov = viz.researchOverview as Record<string, unknown>;
+        viz.researchOverview = {
+          interviewCount: Number(ov.interviewCount) || 0,
+          surveyResponseCount: Number(ov.surveyResponseCount) || 0,
+          wordsAnalyzed: ensureString(ov.wordsAnalyzed),
+          conceptsTracked: Number(ov.conceptsTracked) || 0,
+          themesFound: Number(ov.themesFound) || 0,
+        };
+      }
+      
+      // Normalize brandDescriptors
+      if (Array.isArray(viz.brandDescriptors)) {
+        viz.brandDescriptors = viz.brandDescriptors
+          .map((d: unknown) => {
+            if (d && typeof d === 'object') {
+              const desc = d as Record<string, unknown>;
+              return {
+                word: ensureString(desc.word || desc.name || desc.term || ''),
+                count: Number(desc.count || desc.frequency || desc.mentions || 1),
+              };
+            }
+            if (typeof d === 'string') return { word: d, count: 1 };
+            return null;
+          })
+          .filter((d: unknown) => d && (d as {word: string}).word)
+          .sort((a: unknown, b: unknown) => ((b as {count: number}).count || 0) - ((a as {count: number}).count || 0));
+      }
+      
+      // Normalize thematicRadar
+      if (viz.thematicRadar && typeof viz.thematicRadar === 'object') {
+        const radar = viz.thematicRadar as Record<string, unknown>;
+        radar.dimensions = ensureArray(radar.dimensions);
+        radar.speakers = ensureArray(radar.speakers).map((s: unknown) => {
+          if (s && typeof s === 'object') {
+            const sp = s as Record<string, unknown>;
+            return {
+              key: ensureString(sp.key || sp.initials || ''),
+              name: ensureString(sp.name || sp.fullName || ''),
+              role: ensureString(sp.role || sp.title || ''),
+            };
+          }
+          return { key: '', name: '', role: '' };
+        }).filter((s: {key: string; name: string}) => s.key && s.name);
+      }
+      
+      // Normalize convergencePoints
+      if (Array.isArray(viz.convergencePoints)) {
+        viz.convergencePoints = viz.convergencePoints
+          .map((p: unknown) => {
+            if (p && typeof p === 'object') {
+              const pt = p as Record<string, unknown>;
+              return {
+                label: ensureString(pt.label || pt.point || pt.description || ''),
+                percentage: Math.min(100, Math.max(0, Number(pt.percentage || pt.pct || pt.agreement || 0))),
+              };
+            }
+            return null;
+          })
+          .filter((p: unknown) => p && (p as {label: string}).label);
+      }
+      
+      // Normalize divergencePoints
+      if (Array.isArray(viz.divergencePoints)) {
+        viz.divergencePoints = viz.divergencePoints
+          .map((p: unknown) => {
+            if (p && typeof p === 'object') {
+              const pt = p as Record<string, unknown>;
+              return {
+                label: ensureString(pt.label || pt.point || pt.question || pt.description || ''),
+                tensionScore: Math.min(100, Math.max(0, Number(pt.tensionScore || pt.tension || pt.score || pt.t || 0))),
+              };
+            }
+            return null;
+          })
+          .filter((p: unknown) => p && (p as {label: string}).label);
+      }
+      
+      findings.researchVisualization = viz;
+    }
 
     // Sanitize em-dashes throughout
     const sanitize = (obj: unknown): unknown => {

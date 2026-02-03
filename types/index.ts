@@ -155,6 +155,51 @@ export interface ContentAnalysis {
   }>;
 }
 
+export interface ResearchOverview {
+  interviewCount: number;
+  surveyResponseCount: number;
+  wordsAnalyzed: string;
+  conceptsTracked: number;
+  themesFound: number;
+}
+
+export interface BrandDescriptor {
+  word: string;
+  count: number;
+}
+
+export interface ThematicRadarDimension {
+  subject: string;
+  [speakerKey: string]: string | number;
+}
+
+export interface ThematicRadarSpeaker {
+  key: string;
+  name: string;
+  role: string;
+}
+
+export interface ConvergencePoint {
+  label: string;
+  percentage: number;
+}
+
+export interface DivergencePoint {
+  label: string;
+  tensionScore: number;
+}
+
+export interface ResearchVisualization {
+  researchOverview?: ResearchOverview;
+  brandDescriptors?: BrandDescriptor[];
+  thematicRadar?: {
+    dimensions: ThematicRadarDimension[];
+    speakers: ThematicRadarSpeaker[];
+  };
+  convergencePoints?: ConvergencePoint[];
+  divergencePoints?: DivergencePoint[];
+}
+
 export interface FindingsDocument {
   version: string;
   brandName: string;
@@ -180,6 +225,7 @@ export interface FindingsDocument {
     howDirection: string;
   };
   strategicRecommendations: string[];
+  researchVisualization?: ResearchVisualization;
   conclusion: string;
   generatedAt: Date | string;
 }

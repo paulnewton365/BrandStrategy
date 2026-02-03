@@ -58,6 +58,103 @@ export async function generateFindingsDocx(findings: FindingsDocument): Promise<
     );
   }
 
+  // Research Visualization Data (text representation for DOCX)
+  const viz = findings.researchVisualization;
+  if (viz) {
+    // Research Overview
+    if (viz.researchOverview) {
+      const ov = viz.researchOverview;
+      const statParts: string[] = [];
+      if (ov.interviewCount > 0) statParts.push(`${ov.interviewCount} Interviews`);
+      if (ov.surveyResponseCount > 0) statParts.push(`${ov.surveyResponseCount} Survey Responses`);
+      if (ov.wordsAnalyzed) statParts.push(`${ov.wordsAnalyzed} Words Analyzed`);
+      if (ov.conceptsTracked > 0) statParts.push(`${ov.conceptsTracked} Concepts Tracked`);
+      if (ov.themesFound > 0) statParts.push(`${ov.themesFound} Themes Found`);
+      if (statParts.length > 0) {
+        children.push(
+          new Paragraph({
+            heading: HeadingLevel.HEADING_1,
+            children: [new TextRun({ text: 'Research Overview', bold: true, size: 32 })]
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: statParts.join('  |  '), size: 24 })]
+          }),
+          new Paragraph({ children: [] })
+        );
+      }
+    }
+
+    // Brand Descriptors
+    if (viz.brandDescriptors && viz.brandDescriptors.length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Brand Descriptor Galaxy', bold: true, size: 28 })]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: 'Combined from survey descriptive words and interview language patterns', size: 22, italics: true, color: '7A7E87' })]
+        })
+      );
+      const descriptorText = viz.brandDescriptors
+        .map(d => `${d.word} (x${d.count})`)
+        .join('  ·  ');
+      children.push(
+        new Paragraph({
+          children: [new TextRun({ text: descriptorText, size: 24 })]
+        }),
+        new Paragraph({ children: [] })
+      );
+    }
+
+    // Convergence Points
+    if (viz.convergencePoints && viz.convergencePoints.length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Convergence Points', bold: true, size: 28 })]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: 'Where interviews and surveys agree', size: 22, italics: true, color: '7A7E87' })]
+        })
+      );
+      viz.convergencePoints.forEach(point => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${point.percentage}%`, bold: true, size: 24, color: '2A9D8F' }),
+              new TextRun({ text: `  ${point.label}`, size: 24 }),
+            ]
+          })
+        );
+      });
+      children.push(new Paragraph({ children: [] }));
+    }
+
+    // Divergence Points
+    if (viz.divergencePoints && viz.divergencePoints.length > 0) {
+      children.push(
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          children: [new TextRun({ text: 'Divergence Points', bold: true, size: 28 })]
+        }),
+        new Paragraph({
+          children: [new TextRun({ text: 'Topics where internal alignment is weaker', size: 22, italics: true, color: '7A7E87' })]
+        })
+      );
+      viz.divergencePoints.forEach(point => {
+        children.push(
+          new Paragraph({
+            children: [
+              new TextRun({ text: `${point.tensionScore}%`, bold: true, size: 24, color: 'D64545' }),
+              new TextRun({ text: `  ${point.label}`, size: 24 }),
+            ]
+          })
+        );
+      });
+      children.push(new Paragraph({ children: [] }));
+    }
+  }
+
   // Key Findings
   if (keyFindings.length > 0) {
     children.push(
