@@ -144,7 +144,7 @@ export default function ResearchVisualizationsView({ visualization, brandName }:
             Thematic Emphasis Radar
           </h2>
           <p className="text-sm text-antenna-muted mb-6 -mt-2">
-            Normalized thematic emphasis per speaker across key dimensions
+            Raw word frequency counts per speaker across key thematic dimensions
           </p>
           <ResponsiveContainer width="100%" height={400}>
             <RadarChart data={thematicRadar.dimensions} cx="50%" cy="50%" outerRadius="72%">

@@ -1,3 +1,5 @@
+import { buildFrequencyContext } from './textAnalysis';
+
 export const ANALYSIS_PROMPT = `You are a brand strategist analyzing stakeholder research to develop brand strategy insights. Your task is to analyze the provided inputs and generate a comprehensive findings document.
 
 CRITICAL FORMATTING RULES:
@@ -156,13 +158,26 @@ ANALYSIS FRAMEWORK:
       - Include words like personality traits, values, and attributes stakeholders associate with the brand
       - Draw from direct language used by stakeholders (e.g. "trusted", "innovative", "educational")
 
-   c) thematicRadar: Analyze thematic emphasis per interviewee across 5-7 dimensions:
-      - dimensions: Array of objects where each has a "subject" field (theme name) and a key for each speaker with their emphasis score (0-30 scale based on mention frequency and emphasis)
-      - speakers: Array of { key: string (2-letter initials), name: string (full name), role: string (their role/title if known) }
-      - Use 2-letter uppercase initials as speaker keys (e.g. "ST", "ZC")
-      - Choose 5-7 thematic dimensions that reveal meaningful differences between speakers
-      - Score based on how frequently and emphatically each speaker discussed each theme
-      - ONLY include if there are 2+ interview transcripts available
+   c) thematicRadar: Define concepts and groupings for a radar chart. Actual values will be COMPUTED PROGRAMMATICALLY from real word frequency counts in the transcripts - do NOT provide scores.
+      
+      Return an object with:
+      - conceptDefinitions: Array of 12-18 concept groups to count. Each: { name: string, searchTerms: string[] }
+        * name: descriptive label (e.g. "education / educate", "trust / trusted", "global / world")
+        * searchTerms: EXACT lowercase words to count in transcripts (e.g. ["education", "educate", "educational", "educator", "educators"])
+        * Include morphological variants and plurals in searchTerms
+        * Choose concepts that appear meaningfully in the WORD FREQUENCY ANALYSIS provided
+        * Do NOT include overly generic words - focus on thematically significant terms
+      
+      - radarDimensions: Array of 5-7 thematic dimensions for the radar axes. Each: { subject: string, conceptNames: string[] }
+        * subject: the radar axis label (e.g. "Education", "Facts & Trust", "Global Reach")
+        * conceptNames: which concept definition names to SUM for this dimension (must match conceptDefinitions names exactly)
+        * Each dimension should combine 1-3 related concepts
+        * Choose dimensions that reveal DISTINCT speaker emphasis patterns based on the frequency data
+      
+      - speakerRoles: Object mapping speaker initials to their role/title if identifiable from context (e.g. { "ST": "Founder", "GH": "President" })
+      
+      CRITICAL: Do NOT provide numeric scores or dimension data arrays. Only provide the definitions above. The system will compute actual values by counting term occurrences in the real transcript text.
+      ONLY include if there are 2+ interview transcripts available.
 
    d) convergencePoints: Identify 4-6 points where interviews and surveys AGREE. Each: { label: string, percentage: number (60-100) }
       - percentage represents the approximate % of all sources that align on this point
@@ -296,6 +311,11 @@ export function buildAnalysisContext(inputs: {
   inputs.interviews.forEach((interview, i) => {
     context += `--- Interview ${i + 1}: ${interview.name} ---\n${interview.content}\n\n`;
   });
+
+  // Add programmatic word frequency analysis for thematic radar
+  if (inputs.interviews.length >= 2) {
+    context += buildFrequencyContext(inputs.interviews);
+  }
 
   context += `=== QUESTIONNAIRE RESPONSES (SECONDARY SOURCE) ===\n\n`;
   inputs.questionnaires.forEach((response, i) => {

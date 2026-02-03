@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { ANALYSIS_PROMPT, buildAnalysisContext } from '@/lib/prompts';
 import { FindingsDocument } from '@/types';
+import { computeConceptFrequencies, computeRadarFromConcepts } from '@/lib/textAnalysis';
 
 export async function POST(request: NextRequest) {
   try {
@@ -271,21 +272,62 @@ Return the JSON object starting with { and ending with }`
           .sort((a: unknown, b: unknown) => ((b as {count: number}).count || 0) - ((a as {count: number}).count || 0));
       }
       
-      // Normalize thematicRadar
-      if (viz.thematicRadar && typeof viz.thematicRadar === 'object') {
+      // Compute thematicRadar from REAL word frequency counts
+      if (viz.thematicRadar && typeof viz.thematicRadar === 'object' && interviews.length >= 2) {
         const radar = viz.thematicRadar as Record<string, unknown>;
-        radar.dimensions = ensureArray(radar.dimensions);
-        radar.speakers = ensureArray(radar.speakers).map((s: unknown) => {
-          if (s && typeof s === 'object') {
-            const sp = s as Record<string, unknown>;
-            return {
-              key: ensureString(sp.key || sp.initials || ''),
-              name: ensureString(sp.name || sp.fullName || ''),
-              role: ensureString(sp.role || sp.title || ''),
+        const conceptDefs = ensureArray(radar.conceptDefinitions) as Array<Record<string, unknown>>;
+        const dimDefs = ensureArray(radar.radarDimensions) as Array<Record<string, unknown>>;
+        const speakerRoles = (radar.speakerRoles && typeof radar.speakerRoles === 'object')
+          ? radar.speakerRoles as Record<string, string>
+          : {};
+
+        if (conceptDefs.length > 0 && dimDefs.length > 0) {
+          // Parse concept definitions from AI
+          const parsedConcepts = conceptDefs
+            .map(c => ({
+              name: ensureString(c.name),
+              searchTerms: ensureStringArray(c.searchTerms),
+            }))
+            .filter(c => c.name && c.searchTerms.length > 0);
+
+          // Parse radar dimension definitions from AI
+          const parsedDimensions = dimDefs
+            .map(d => ({
+              subject: ensureString(d.subject),
+              conceptNames: ensureStringArray(d.conceptNames),
+            }))
+            .filter(d => d.subject && d.conceptNames.length > 0);
+
+          if (parsedConcepts.length > 0 && parsedDimensions.length > 0) {
+            // Compute REAL counts from actual transcript text
+            const { speakers, concepts } = computeConceptFrequencies(interviews, parsedConcepts);
+            const computedDimensions = computeRadarFromConcepts(concepts, speakers, parsedDimensions);
+
+            console.log('Radar computed from real word counts:', {
+              speakers: speakers.map(s => `${s.name}(${s.initials}): ${s.totalWords} words`),
+              sampleDimension: computedDimensions[0],
+            });
+
+            // Build final thematicRadar with computed data
+            viz.thematicRadar = {
+              dimensions: computedDimensions,
+              speakers: speakers.map(s => ({
+                key: s.initials,
+                name: s.name,
+                role: speakerRoles[s.initials] || '',
+              })),
             };
+          } else {
+            // Fallback: remove radar if definitions were invalid
+            delete viz.thematicRadar;
           }
-          return { key: '', name: '', role: '' };
-        }).filter((s: {key: string; name: string}) => s.key && s.name);
+        } else {
+          // AI didn't return concept definitions - remove radar
+          delete viz.thematicRadar;
+        }
+      } else if (viz.thematicRadar) {
+        // Not enough interviews for radar
+        delete viz.thematicRadar;
       }
       
       // Normalize convergencePoints
